@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingy", "Constra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingyTests", "ConstraintThingyTests\ConstraintThingyTests.csproj", "{572AE43D-3816-42D3-9057-02081AE88D8B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingyGUI", "ConstraintThingyGUI\ConstraintThingyGUI.csproj", "{2B0CFE51-6220-4165-B093-BF1F6732F1E3}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Intervals.vsmdi
@@ -69,6 +71,16 @@ Global
 		{572AE43D-3816-42D3-9057-02081AE88D8B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{572AE43D-3816-42D3-9057-02081AE88D8B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{572AE43D-3816-42D3-9057-02081AE88D8B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Debug|x86.ActiveCfg = Debug|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Debug|x86.Build.0 = Debug|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Release|Any CPU.ActiveCfg = Release|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Release|Mixed Platforms.Build.0 = Release|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Release|x86.ActiveCfg = Release|x86
+		{2B0CFE51-6220-4165-B093-BF1F6732F1E3}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

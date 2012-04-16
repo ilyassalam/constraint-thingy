@@ -9,7 +9,8 @@ namespace Intervals
     /// </summary>
     public struct Interval
     {
-        public Interval(float lowerBound, float upperBound) : this()
+        public Interval(float lowerBound, float upperBound)
+            : this()
         {
             if (lowerBound > upperBound) throw new ArgumentOutOfRangeException(String.Format("The upper bound of {0} must be at least the lower bound of {1}", upperBound, lowerBound));
 

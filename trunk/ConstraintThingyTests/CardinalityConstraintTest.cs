@@ -1,6 +1,5 @@
 ﻿using ConstraintThingy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Tests
 {
@@ -10,7 +9,7 @@ namespace Tests
     ///This is a test class for CardinalityConstraintTest and is intended
     ///to contain all CardinalityConstraintTest Unit Tests
     ///</summary>
-    [TestClass()]
+    [TestClass]
     public class CardinalityConstraintTest
     {
 
@@ -21,7 +20,9 @@ namespace Tests
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
+// ReSharper disable ConvertToAutoProperty
         public TestContext TestContext
+// ReSharper restore ConvertToAutoProperty
         {
             get
             {
@@ -67,11 +68,11 @@ namespace Tests
         /// <summary>
         ///A test for Narrowed
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void NarrowedTest()
         {
             FiniteDomain d = new FiniteDomain("hub", "forest", "swamp", "cave", "other");
-            FiniteDomainVariable[] vars = new FiniteDomainVariable[]
+            FiniteDomainVariable[] vars = new[]
                                               {
                                                   new FiniteDomainVariable("l1", d),
                                                   new FiniteDomainVariable("l2", d),
@@ -87,12 +88,14 @@ namespace Tests
             new CardinalityConstraint("cave", 1, 1, vars);
             vars[0].UniqueValue = "hub";
             int solutions = 0;
+#pragma warning disable 168
             foreach (var ignore1 in vars[0].UniqueValues())
                 foreach (var ignore2 in vars[1].UniqueValues())
                     foreach (var ignore3 in vars[2].UniqueValues())
                         foreach (var ignore4 in vars[3].UniqueValues())
                             foreach (var ignore5 in vars[4].UniqueValues())
                                 foreach (var ignore6 in vars[5].UniqueValues())
+#pragma warning restore 168
                                 {
                                     solutions++;
                                 }

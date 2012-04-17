@@ -89,12 +89,13 @@ namespace Tests
             vars[0].UniqueValue = "hub";
             int solutions = 0;
 #pragma warning disable 168
-            foreach (var ignore1 in vars[0].UniqueValues())
-                foreach (var ignore2 in vars[1].UniqueValues())
-                    foreach (var ignore3 in vars[2].UniqueValues())
-                        foreach (var ignore4 in vars[3].UniqueValues())
-                            foreach (var ignore5 in vars[4].UniqueValues())
-                                foreach (var ignore6 in vars[5].UniqueValues())
+            foreach (var ignore in Variable.Solutions(vars))
+            //foreach (var ignore1 in vars[0].UniqueValues())
+            //    foreach (var ignore2 in vars[1].UniqueValues())
+            //        foreach (var ignore3 in vars[2].UniqueValues())
+            //            foreach (var ignore4 in vars[3].UniqueValues())
+            //                foreach (var ignore5 in vars[4].UniqueValues())
+            //                    foreach (var ignore6 in vars[5].UniqueValues())
 #pragma warning restore 168
                                 {
                                     solutions++;

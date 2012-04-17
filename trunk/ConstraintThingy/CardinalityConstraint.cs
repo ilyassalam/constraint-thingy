@@ -41,6 +41,11 @@ namespace ConstraintThingy
         /// </summary>
         public readonly int Max;
 
+        /// <summary>
+        /// Called when narrowedVariable is narrowed.
+        /// Determine whether contraint is still satisfiable given the values of all participating variables.
+        /// </summary>
+        /// <param name="narrowedVariable"></param>
         public override void Narrowed(Variable narrowedVariable)
         {
             int possible = 0;
@@ -61,6 +66,9 @@ namespace ConstraintThingy
                 throw new Failure("Too many occurances of Value in CardinalityConstraint");
         }
 
+        /// <summary>
+        /// Not used for this type of constraint.
+        /// </summary>
         public override void UpdateVariable(FiniteDomainVariable var)
         {
             // Should never reach this point.

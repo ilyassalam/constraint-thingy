@@ -38,6 +38,7 @@ namespace ConstraintThingy
             get { return false;  }
         }
 
+        #region Solution finding
         /// <summary>
         /// Narrows the variable until it has a unique value, or throws failure if there's no possible consistent value.
         /// </summary>
@@ -45,6 +46,55 @@ namespace ConstraintThingy
         {
             throw new NotImplementedException("Class does not define a method for narrowing to a unique value.");
         }
+
+        /// <summary>
+        /// Find sets of unique values for VARS that satisfy all constraints.
+        /// </summary>
+        public static IEnumerable<bool> Solutions(params Variable[] vars)
+        {
+            //
+            // This is super-painful becausee C# doesn't allow recursion in iterators.
+            // Understandable, but it means we have to manually implement a recursion stack.
+            //
+
+            if (vars.Length == 0)
+                yield break;
+            // Allocate stack of enumerators
+            var enumerators = new IEnumerator<bool>[vars.Length];
+            int tos = 0;
+            enumerators[tos] = vars[tos].UniqueValues().GetEnumerator();
+            while (true)
+            {
+                // Find the next solution.
+                while (true)
+                {
+                    // Try to advance the variable at the top of stack
+                    if (enumerators[tos].MoveNext())
+                    {
+                        // It worked.
+                        if (tos == enumerators.Length - 1)
+                            // This was the last variable, so we've found a solution.
+                            break;
+                        else
+                        {
+                            // Need to "recurse"
+                            tos++;
+                            enumerators[tos] = vars[tos].UniqueValues().GetEnumerator();
+                        }
+                    }
+                    else
+                    {
+                        // MoveNext failed.  Pop the stack.
+                        tos--;
+                        if (tos < 0)
+                            // Popped off the top of the stack: we're done.
+                            yield break;
+                    }
+                }
+                yield return false;
+            }
+        }
+        #endregion
 
         #region Undostack management
         /// <summary>
@@ -141,6 +191,7 @@ namespace ConstraintThingy
             mValue = initialValue;
         }
 
+        #region Value tracking
         /// <summary>
         /// 
         /// </summary>
@@ -161,7 +212,8 @@ namespace ConstraintThingy
             }
         }
         private T mValue;
-
+        #endregion
+        
         #region Undostack management
         private void SaveValue()
         {

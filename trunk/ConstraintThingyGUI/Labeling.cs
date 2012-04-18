@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using ConstraintThingy;
 
 namespace ConstraintThingyGUI
@@ -8,6 +9,30 @@ namespace ConstraintThingyGUI
     /// </summary>
     public abstract class Labeling
     {
+        /// <summary>
+        /// The current value of the labeling on the specified node.  Type depending on the kind of labeling.
+        /// </summary>
+        public abstract object this[Node n] { get; set; }
+
+        /// <summary>
+        /// Returns a string with the value of each label on the node, separated by line breaks
+        /// </summary>
+        public string FormatLabels(Node n)
+        {
+            var result = new StringBuilder();
+            foreach (var l in AllLabelings)
+            {
+                result.Append(l[n].ToString());
+                result.Append('\n');
+            }
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// List of all Labelings that have been created.
+        /// </summary>
+        public static readonly List<Labeling> AllLabelings = new List<Labeling>();
+
         /// <summary>
         /// Name of label, for debugging purposes
         /// </summary>
@@ -19,12 +44,8 @@ namespace ConstraintThingyGUI
         protected Labeling(string name)
         {
             Name = name;
+            AllLabelings.Add(this);
         }
-
-        /// <summary>
-        /// The current value of the labeling on the specified node.  Type depending on the kind of labeling.
-        /// </summary>
-        public abstract object this[Node n] { get; set; }
     }
 
     /// <summary>

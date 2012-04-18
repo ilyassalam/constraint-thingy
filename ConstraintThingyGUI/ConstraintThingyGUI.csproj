@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\ConstraintThingyGUI.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -55,6 +56,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Labeling.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="UndirectedEdge.cs" />
     <Compile Include="UndirectedGraph.cs" />
@@ -97,6 +99,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConstraintThingy\ConstraintThingy.csproj">
+      <Project>{6B64D5A2-2A67-4B67-8B27-24B54FC72AF1}</Project>
+      <Name>ConstraintThingy</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Intervals\Intervals.csproj">
       <Project>{94B8C1D0-4FE3-4DB2-B84E-E5EEB694285F}</Project>
       <Name>Intervals</Name>

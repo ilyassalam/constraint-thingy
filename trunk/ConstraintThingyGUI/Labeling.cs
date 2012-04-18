@@ -17,7 +17,7 @@ namespace ConstraintThingyGUI
         /// <summary>
         /// Returns a string with the value of each label on the node, separated by line breaks
         /// </summary>
-        public string FormatLabels(Node n)
+        public static string FormatLabels(Node n)
         {
             var result = new StringBuilder();
             foreach (var l in AllLabelings)

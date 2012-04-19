@@ -3,11 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ConstraintThingyGUI="clr-namespace:ConstraintThingyGUI" Title="MainWindow" Height="478" Width="762">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="675*" />
+            <ColumnDefinition Width="65*" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="88*" />
             <RowDefinition Height="77*" />
             <RowDefinition Height="348*" />
         </Grid.RowDefinitions>
-        <ConstraintThingyGUI:GraphCanvas x:Name="graphCanvas" Background="White" SnapsToDevicePixels="False" Grid.RowSpan="3" />
+        <ConstraintThingyGUI:GraphCanvas x:Name="graphCanvas" Background="White" SnapsToDevicePixels="False" Grid.RowSpan="3" Grid.ColumnSpan="2">
+            <Button Content="Solve" Height="29" Name="solveButton" Width="81" Click="solveButton_Click" Canvas.Left="659" Canvas.Top="0" />
+            <Label Canvas.Left="662" Canvas.Top="35" Height="34" Name="solutionTime" Width="78" />
+        </ConstraintThingyGUI:GraphCanvas>
     </Grid>
 </Window>

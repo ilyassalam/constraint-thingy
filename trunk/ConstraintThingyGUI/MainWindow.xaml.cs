@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ConstraintThingy;
 using Intervals;
 
@@ -19,7 +10,7 @@ namespace ConstraintThingyGUI
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         /// <summary>
         /// The main window for the GUI
@@ -33,9 +24,9 @@ namespace ConstraintThingyGUI
             var hub = new Node("hub", new AABB(new Vector2(200, 0), new Vector2(300, 100)));
             graph.AddNode(hub);
 
-            for (int x = 0; x < 500; x += 50)
+            for (int x = 0; x < 600; x += 110)
             {
-                var n = new Node(new AABB(new Vector2(x, 125), new Vector2(x+40, 125+40)));
+                var n = new Node(new AABB(new Vector2(x, 125), new Vector2(x+100, 125+100)));
                 graph.AddNode(n);
                 graph.AddEdge(new UndirectedEdge(hub, n));
             }
@@ -46,8 +37,28 @@ namespace ConstraintThingyGUI
             type.LimitOccurences("forest", 1, 1);
             type.LimitOccurences("swamp", 1, 1);
             type.LimitOccurences("cave", 1, 1);
-            var solutionIterator = Variable.Solutions().GetEnumerator();
-            solutionIterator.MoveNext();
+            solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
+            graphCanvas.UpdateText();
+        }
+
+        readonly Stopwatch timer = new Stopwatch();
+        void NextSolution()
+        {
+            Cursor = Cursors.Wait;
+            timer.Reset();
+            timer.Start();
+            solveButton.IsEnabled = solutionIterator.MoveNext();
+            timer.Stop();
+            solutionTime.Content = string.Format("{0}ms", timer.ElapsedMilliseconds);
+            graphCanvas.UpdateText();
+            Cursor = Cursors.Arrow;
+        }
+
+        private readonly IEnumerator<bool> solutionIterator;
+
+        private void solveButton_Click(object sender, RoutedEventArgs e)
+        {
+            NextSolution();
         }
         
     }

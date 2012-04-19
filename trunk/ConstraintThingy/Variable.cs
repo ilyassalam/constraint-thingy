@@ -53,7 +53,7 @@ namespace ConstraintThingy
         /// <summary>
         /// Find sets of unique values that satisfy all constraints for all variables.
         /// </summary>
-        public static IEnumerable<bool> Solutions()
+        public static IEnumerable<bool> SolutionsAllVariables()
         {
             return Solutions(AllVariables.ToArray());
         }

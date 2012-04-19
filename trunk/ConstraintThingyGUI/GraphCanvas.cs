@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Intervals;
@@ -23,6 +20,7 @@ namespace ConstraintThingyGUI
         }
 
         private Dictionary<Node, Rectangle> nodeMapping;
+        private Dictionary<Node, TextBlock> textMapping;
         private Dictionary<UndirectedEdge, Line> edgeMapping;
         private Dictionary<Node, List<UndirectedEdge>> nodesToEdges; 
 
@@ -61,6 +59,7 @@ namespace ConstraintThingyGUI
             }
 
             nodeMapping = new Dictionary<Node, Rectangle>();
+            textMapping = new Dictionary<Node, TextBlock>();
             edgeMapping = new Dictionary<UndirectedEdge, Line>();
             nodesToEdges = new Dictionary<Node, List<UndirectedEdge>>();
         }
@@ -86,7 +85,7 @@ namespace ConstraintThingyGUI
 
         private void AddNode(Node node)
         {
-            var rectangle = new Rectangle()
+            var rectangle = new Rectangle
                                 {
                                     Width = node.AABB.Width,
                                     Height = node.AABB.Height,
@@ -94,9 +93,25 @@ namespace ConstraintThingyGUI
                                     Stroke = Brushes.Black,
                                     Fill = Brushes.Green
                                 };
-
             nodeMapping[node] = rectangle;
-            Children.Add(rectangle);
+            Children.Add(rectangle); 
+            
+            var text = new TextBlock
+                           {
+                               Width = node.AABB.Width,
+                               Height = node.AABB.Height,
+                               RenderTransform = new TranslateTransform(node.AABB.UpperLeft.X, node.AABB.UpperLeft.Y)
+                           };
+
+            textMapping[node] = text;
+            text.Text = Labeling.FormatLabels(node);
+            Children.Add(text);
+        }
+
+        public void UpdateText()
+        {
+            foreach (var pair in textMapping)
+                pair.Value.Text = Labeling.FormatLabels(pair.Key);
         }
 
         private void RemoveNode(Node node)
@@ -113,7 +128,7 @@ namespace ConstraintThingyGUI
             Vector2 center1 = edge.First.AABB.Center;
             Vector2 center2 = edge.Second.AABB.Center;
 
-            var line = new Line()
+            var line = new Line
                            {
                                X1 = center1.X,
                                Y1 = center1.Y,

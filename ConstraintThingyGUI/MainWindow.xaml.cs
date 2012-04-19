@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ConstraintThingy;
 using Intervals;
 
 namespace ConstraintThingyGUI
@@ -26,18 +27,27 @@ namespace ConstraintThingyGUI
         public MainWindow()
         {
             InitializeComponent();
-            
+
             var graph = new UndirectedGraph();
 
-            var node1 = new Node(new AABB(new Vector2(0, 0), new Vector2(100, 100)));
-            graph.AddNode(node1);
+            var hub = new Node("hub", new AABB(new Vector2(200, 0), new Vector2(300, 100)));
+            graph.AddNode(hub);
 
-            var node2 = new Node(new AABB(new Vector2(125, 125), new Vector2(200, 200)));
-            graph.AddNode(node2);
-
-            graph.AddEdge(new UndirectedEdge(node1, node2));
+            for (int x = 0; x < 500; x += 50)
+            {
+                var n = new Node(new AABB(new Vector2(x, 125), new Vector2(x+40, 125+40)));
+                graph.AddNode(n);
+                graph.AddEdge(new UndirectedEdge(hub, n));
+            }
             
-            graphCanvas.Graph = graph;
+            graphCanvas.Graph = UndirectedGraph.CurrentGraph = graph;
+            var type = new FiniteDomainLabeling("type", new FiniteDomain("hub", "forest", "swamp", "cave", "other"));
+            type.LimitOccurences("hub", 1, 1);
+            type.LimitOccurences("forest", 1, 1);
+            type.LimitOccurences("swamp", 1, 1);
+            type.LimitOccurences("cave", 1, 1);
+            var solutionIterator = Variable.Solutions().GetEnumerator();
+            solutionIterator.MoveNext();
         }
         
     }

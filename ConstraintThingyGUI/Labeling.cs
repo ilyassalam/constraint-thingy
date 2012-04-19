@@ -131,7 +131,7 @@ namespace ConstraintThingyGUI
         /// </summary>
         protected override FiniteDomainVariable MakeVariable(Node n)
         {
-            return new FiniteDomainVariable(string.Format("node:{0}", Name), Domain);
+            return new FiniteDomainVariable(string.Format("{0}:{1}", n.Name, Name), Domain);
         }
 
         /// <summary>

@@ -8,6 +8,8 @@ namespace ConstraintThingy
     /// </summary>
     public abstract class Variable
     {
+        static readonly List<Variable> AllVariables = new List<Variable>(); 
+
         /// <summary>
         /// Base initializer for variables; just sets the debugging name.
         /// </summary>
@@ -15,6 +17,7 @@ namespace ConstraintThingy
         {
             Name = name;
             lastSaveFramePointer = -1;
+            AllVariables.Add(this);
         }
 
         /// <summary>
@@ -45,6 +48,14 @@ namespace ConstraintThingy
         public virtual IEnumerable<bool> UniqueValues()
         {
             throw new NotImplementedException("Class does not define a method for narrowing to a unique value.");
+        }
+
+        /// <summary>
+        /// Find sets of unique values that satisfy all constraints for all variables.
+        /// </summary>
+        public static IEnumerable<bool> Solutions()
+        {
+            return Solutions(AllVariables.ToArray());
         }
 
         /// <summary>

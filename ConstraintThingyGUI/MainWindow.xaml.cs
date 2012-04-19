@@ -29,23 +29,13 @@ namespace ConstraintThingyGUI
             
             var graph = new UndirectedGraph();
 
-            var node1 = new Node()
-                            {
-                                AABB = new AABB(new Vector2(0, 0), new Vector2(100, 100))
-                            };
-
+            var node1 = new Node(new AABB(new Vector2(0, 0), new Vector2(100, 100)));
             graph.AddNode(node1);
 
-            var node2 = new Node()
-                            {
-                                AABB = new AABB(new Vector2(125, 125), new Vector2(200, 200))
-                            };
-
+            var node2 = new Node(new AABB(new Vector2(125, 125), new Vector2(200, 200)));
             graph.AddNode(node2);
 
-            var edge = new UndirectedEdge(node1, node2);
-
-            graph.AddEdge(edge);
+            graph.AddEdge(new UndirectedEdge(node1, node2));
             
             graphCanvas.Graph = graph;
         }

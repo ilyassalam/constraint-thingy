@@ -17,7 +17,7 @@ namespace ConstraintThingyGUI
         /// </summary>
         public string Name { get; private set; }
 
-        private static int uidCounter = 0;
+        private static int uidCounter;
         static string MakeName()
         {
             return string.Format("N{0}", uidCounter++);

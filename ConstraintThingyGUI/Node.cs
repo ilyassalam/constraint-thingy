@@ -7,6 +7,9 @@ namespace ConstraintThingyGUI
     /// </summary>
     public class Node
     {
+        /// <summary>
+        /// The bounding box of the node on the screen
+        /// </summary>
         public AABB AABB { get; set; }
     }
 }

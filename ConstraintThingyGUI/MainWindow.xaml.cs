@@ -20,6 +20,9 @@ namespace ConstraintThingyGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// The main window for the GUI
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();

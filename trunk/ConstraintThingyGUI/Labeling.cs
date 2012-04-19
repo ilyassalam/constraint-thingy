@@ -21,10 +21,7 @@ namespace ConstraintThingyGUI
         {
             var result = new StringBuilder();
             foreach (var l in AllLabelings)
-            {
-                result.Append(l[n].ToString());
-                result.Append('\n');
-            }
+                result.AppendFormat("{0}={1}", l.Name, l[n]);
             return result.ToString();
         }
 
@@ -86,6 +83,24 @@ namespace ConstraintThingyGUI
         }
 
         /// <summary>
+        /// Returns an array of all variables corresponding to the nodes of GRAPH.
+        /// For use in creating constraints.
+        /// </summary>
+        public T[] ValueVariables(UndirectedGraph graph)
+        {
+            return ValueVariables(graph.Nodes);
+        }
+
+        /// <summary>
+        /// Returns an array of all variables corresponding to the nodes of the current graph.
+        /// For use in creating constraints.
+        /// </summary>
+        public T[] ValueVariables()
+        {
+            return ValueVariables(UndirectedGraph.CurrentGraph);
+        }
+
+        /// <summary>
         /// Creates a new variable to represent the value of this labeling on the specified node.
         /// </summary>
         protected abstract T MakeVariable(Node n);
@@ -124,8 +139,16 @@ namespace ConstraintThingyGUI
         /// </summary>
         public override object this[Node n]
         {
-            get { return ValueVariable(n).ToString(); }
+            get { return ValueVariable(n).ValueString; }
             set { ValueVariable(n).UniqueValue = (string)value; }
+        }
+
+        /// <summary>
+        /// Limits how many times VALUE can occur in the labeling
+        /// </summary>
+        public void LimitOccurences(string value, int minOccurences, int maxOccurences)
+        {
+            new CardinalityConstraint(value, minOccurences, maxOccurences, ValueVariables());
         }
     }
 }

@@ -124,21 +124,42 @@ namespace ConstraintThingy
             {
                 StringBuilder b = new StringBuilder();
                 b.Append(Name);
-                b.Append(" = { ");
-                bool firstone = true;
-                for (int i=0;i<Domain.Size; i++)
-                {
-                    if ((Value & ((ulong)1<<i))!= 0)
-                    {
-                        if (!firstone)
-                            b.Append(", ");
-                        firstone = false;
-                        b.Append(Domain.Elements[i]);
-                    }
-                }
-                b.Append(" }");
+                b.Append(" = ");
+                FormatValueString(b);
                 return b.ToString();
             }
+        }
+
+        /// <summary>
+        /// Formats the value of the variable in set notation, or as a single value, if it's singleton set.
+        /// </summary>
+        public string ValueString
+        {
+            get
+            {
+                if (IsUnique)
+                    return UniqueValue;
+                StringBuilder b = new StringBuilder();
+                FormatValueString(b);
+                return b.ToString();
+            }
+        }
+
+        private void FormatValueString(StringBuilder b)
+        {
+            b.Append("{ ");
+            bool firstone = true;
+            for (int i = 0; i < Domain.Size; i++)
+            {
+                if ((Value & ((ulong) 1 << i)) != 0)
+                {
+                    if (!firstone)
+                        b.Append(", ");
+                    firstone = false;
+                    b.Append(Domain.Elements[i]);
+                }
+            }
+            b.Append(" }");
         }
 
         /// <summary>

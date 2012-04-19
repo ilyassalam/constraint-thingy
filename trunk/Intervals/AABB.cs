@@ -40,6 +40,9 @@
         /// </summary>
         public float Height { get { return LowerRight.Y - UpperLeft.Y; } }
 
+        /// <summary>
+        /// True if the struct represents a valid AABB.
+        /// </summary>
         public bool IsValid { get { return LowerRight.X >= UpperLeft.X && LowerRight.Y >= UpperLeft.Y; } }
 
         /// <summary>
@@ -47,13 +50,21 @@
         /// </summary>
         public Vector2 Size { get { return new Vector2(Width, Height);} }
 
+        /// <summary>
+        /// Creates a new AABB with the provided center and the specified width and height.
+        /// </summary>
         public AABB(Vector2 center, float width, float height) : this()
         {
             Vector2 halfSize = new Vector2(width * 0.5f, height * 0.5f);
             UpperLeft = center - halfSize;
             LowerRight = center + halfSize;
         }
-
+        
+        /// <summary>
+        /// Creates a new AABB from the provided upper left and lowe
+        /// </summary>
+        /// <param name="upperLeft"></param>
+        /// <param name="lowerRight"></param>
         public AABB(Vector2 upperLeft, Vector2 lowerRight) : this()
         {
             LowerRight = lowerRight;

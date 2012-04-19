@@ -9,6 +9,9 @@ namespace Intervals
     /// </summary>
     public struct Interval
     {
+        /// <summary>
+        /// Creates a new interval with the specified lower and upper bounds
+        /// </summary>
         public Interval(float lowerBound, float upperBound)
             : this()
         {
@@ -38,6 +41,9 @@ namespace Intervals
         /// </summary>
         public float Center { get { return (UpperBound + LowerBound) * 0.5f; } }
 
+        /// <summary>
+        /// Represents the empty interval
+        /// </summary>
         public static readonly Interval Empty = new Interval(float.NaN, float.NaN);
 
         /// <summary>
@@ -168,31 +174,49 @@ namespace Intervals
 
 #region Overloaded Operators
 
+        /// <summary>
+        /// Adds two intervals
+        /// </summary>
         public static Interval operator+(Interval left, Interval right)
         {
             return Add(left, right);
         }
 
+        /// <summary>
+        /// Subtracts <param name="right"></param> from <param name="left"></param>.
+        /// </summary>
         public static Interval operator -(Interval left, Interval right)
         {
             return Subtract(left, right);
         }
 
+        /// <summary>
+        /// Multiplies two intervals
+        /// </summary>
         public static Interval operator *(Interval left, Interval right)
         {
             return Multiply(left, right);
         }
 
-        public static Interval operator /(Interval left, Interval right)
+        /// <summary>
+        /// Divides <param name="dividend"></param> by <param name="divisor"></param>
+        /// </summary>
+        public static Interval operator /(Interval dividend, Interval divisor)
         {
-            return Divide(left, right);
+            return Divide(dividend, divisor);
         }
 
+        /// <summary>
+        /// Tests for equality between two intervals.
+        /// </summary>
         public static bool operator ==(Interval left, Interval right)
         {
             return left.Equals(right);
         }
 
+        /// <summary>
+        /// Tests for inequality between two intervals.
+        /// </summary>
         public static bool operator !=(Interval left, Interval right)
         {
             return !(left == right);
@@ -201,6 +225,11 @@ namespace Intervals
         #endregion
 
 #region Equality
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -216,6 +245,10 @@ namespace Intervals
             return other.LowerBound.Equals(LowerBound) && other.UpperBound.Equals(UpperBound);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             unchecked
@@ -225,6 +258,10 @@ namespace Intervals
         }
 #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("Lower Bound: {0}, Upper Bound: {1}", LowerBound, UpperBound);

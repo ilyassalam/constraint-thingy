@@ -37,6 +37,11 @@ namespace Intervals
         public float Range { get { return UpperBound - LowerBound; } }
 
         /// <summary>
+        /// True if UpperBound == LowerBound.
+        /// </summary>
+        public bool IsUnique { get { return UpperBound == LowerBound; } }
+
+        /// <summary>
         /// The center value of the interval.
         /// </summary>
         public float Center { get { return (UpperBound + LowerBound) * 0.5f; } }

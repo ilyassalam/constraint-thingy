@@ -46,6 +46,11 @@ namespace ConstraintThingyGUI
                     Children.Remove(kvp.Value);
                 }
 
+                foreach (var kvp in textMapping)
+                {
+                    Children.Remove(kvp.Value);
+                }
+
                 _graph.OnNodeAdded -= AddNode;
                 _graph.OnNodeRemoved -= RemoveNode;
 
@@ -117,7 +122,10 @@ namespace ConstraintThingyGUI
         private void RemoveNode(Node node)
         {
             Children.Remove(nodeMapping[node]);
+            Children.Remove(textMapping[node]);
+
             nodeMapping.Remove(node);
+            textMapping.Remove(node);
         }
 
         private void AddEdge(UndirectedEdge edge)

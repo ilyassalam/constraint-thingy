@@ -42,6 +42,16 @@ namespace Intervals
         public bool IsUnique { get { return UpperBound == LowerBound; } }
 
         /// <summary>
+        /// The upper half of the interval.
+        /// </summary>
+        public Interval UpperHalf { get { return new Interval(Center, UpperBound);} }
+
+        /// <summary>
+        /// The lower half of the interval
+        /// </summary>
+        public Interval LowerHalf { get { return new Interval(LowerBound, Center);} }
+
+        /// <summary>
         /// The center value of the interval.
         /// </summary>
         public float Center { get { return (UpperBound + LowerBound) * 0.5f; } }
@@ -69,6 +79,15 @@ namespace Intervals
         public bool Contains(float value)
         {
             return value <= UpperBound && value >= LowerBound;
+        }
+
+        /// <summary>
+        /// True if the interval contains <param name="value"></param>
+        /// </summary>
+        [Pure]
+        public bool Contains(Interval value)
+        {
+            return value.UpperBound <= UpperBound && value.LowerBound >= LowerBound;
         }
 
 #region Operators

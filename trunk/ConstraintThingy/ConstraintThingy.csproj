@@ -46,7 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdditionConstraint.cs" />
+    <Compile Include="IntervalSumConstraint.cs" />
     <Compile Include="CardinalityConstraint.cs" />
     <Compile Include="Constraint.cs" />
     <Compile Include="ConstraintArc.cs" />
@@ -54,6 +54,7 @@
     <Compile Include="FiniteDomain.cs" />
     <Compile Include="FiniteDomainVariable.cs" />
     <Compile Include="InequalityConstraint.cs" />
+    <Compile Include="IntervalEqualityConstraint.cs" />
     <Compile Include="IntervalVariable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

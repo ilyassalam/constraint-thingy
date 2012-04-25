@@ -50,6 +50,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdditionConstraintTest.cs" />
     <Compile Include="CardinalityConstraintTest.cs" />
     <Compile Include="FiniteDomainVariableTest.cs" />
     <Compile Include="InequalityConstraintTest.cs" />
@@ -60,6 +61,10 @@
     <ProjectReference Include="..\ConstraintThingy\ConstraintThingy.csproj">
       <Project>{6B64D5A2-2A67-4B67-8B27-24B54FC72AF1}</Project>
       <Name>ConstraintThingy</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Intervals\Intervals.csproj">
+      <Project>{94B8C1D0-4FE3-4DB2-B84E-E5EEB694285F}</Project>
+      <Name>Intervals</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

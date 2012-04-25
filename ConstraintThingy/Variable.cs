@@ -197,9 +197,9 @@ namespace ConstraintThingy
         /// <summary>
         /// Creates a new variable
         /// </summary>
-        public Variable(string name, T initialValue) : base(name)
+        public Variable(string name, T allowableRange) : base(name)
         {
-            mValue = initialValue;
+            mValue = allowableRange;
         }
 
         #region Value tracking

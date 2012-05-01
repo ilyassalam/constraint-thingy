@@ -27,6 +27,8 @@ namespace ConstraintThingy
             get { return Elements.Length; }
         }
 
+        public UInt64 UniverseMask { get { return (1UL << Size) - 1; } }
+
         /// <summary>
         /// Returns the bitmask corresponding to the given element.
         /// </summary>

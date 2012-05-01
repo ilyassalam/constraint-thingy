@@ -7,6 +7,7 @@ namespace Intervals
     /// <summary>
     /// An closed interval is a set of real numbers such that any number between the lower and upper bounds, including the endpoints, is also included in the set.
     /// </summary>
+    [DebuggerDisplay("{DebugDisplay}")]
     public struct Interval
     {
         /// <summary>
@@ -39,7 +40,9 @@ namespace Intervals
         /// <summary>
         /// True if UpperBound == LowerBound.
         /// </summary>
+// ReSharper disable CompareOfFloatsByEqualityOperator
         public bool IsUnique { get { return UpperBound == LowerBound; } }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 
         /// <summary>
         /// The upper half of the interval.
@@ -55,6 +58,18 @@ namespace Intervals
         /// The center value of the interval.
         /// </summary>
         public float Center { get { return (UpperBound + LowerBound) * 0.5f; } }
+
+        /// <summary>
+        /// Extends the intervalue to include a new value.
+        /// </summary>
+        /// <param name="value"></param>
+        public void Extend(float value)
+        {
+            if (value < LowerBound)
+                LowerBound = value;
+            else if (value > UpperBound)
+                UpperBound = value;
+        }
 
         /// <summary>
         /// Represents the empty interval
@@ -288,7 +303,14 @@ namespace Intervals
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Format("Lower Bound: {0}, Upper Bound: {1}", LowerBound, UpperBound);
+            return IsUnique?LowerBound.ToString():String.Format("[{0}, {1}]", LowerBound, UpperBound);
+        }
+
+// ReSharper disable UnusedMember.Local
+        private string DebugDisplay
+// ReSharper restore UnusedMember.Local
+        {
+            get { return ToString(); }
         }
     }
 }

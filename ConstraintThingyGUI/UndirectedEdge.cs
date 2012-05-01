@@ -3,6 +3,7 @@ namespace ConstraintThingyGUI
     /// <summary>
     /// Represents an edge of an undirected graph
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("({First.Name}, {Second.Name})")]
     public class UndirectedEdge
     {
         /// <summary>

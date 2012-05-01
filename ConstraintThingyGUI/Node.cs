@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Intervals;
 
 namespace ConstraintThingyGUI
@@ -5,6 +6,7 @@ namespace ConstraintThingyGUI
     /// <summary>
     /// A node in the graph representing the dungeon
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Name}")]
     public class Node
     {
         /// <summary>
@@ -38,5 +40,25 @@ namespace ConstraintThingyGUI
         public Node(AABB aabb)
             : this(MakeName(), aabb)
         {}
+
+        readonly List<Node> neigbors = new List<Node>();
+
+        /// <summary>
+        /// All neighboring nodes of this node.
+        /// </summary>
+        public IList<Node> Neighbors
+        {
+            get { return neigbors;  }
+        }
+
+        internal void AddNeighbor(Node n)
+        {
+            neigbors.Add(n);
+        }
+
+        internal void RemoveNeighbor(Node n)
+        {
+            neigbors.Remove(n);
+        }
     }
 }

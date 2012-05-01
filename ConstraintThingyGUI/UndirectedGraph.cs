@@ -88,21 +88,53 @@ namespace ConstraintThingyGUI
         /// <summary>
         /// Add edge to the graph.
         /// </summary>
-        public void AddEdge(UndirectedEdge node)
+        public void AddEdge(UndirectedEdge edge)
         {
-            if (_edges.Contains(node)) throw new InvalidOperationException("The edge was already present in the graph.");
-            _edges.Add(node);
-            if (OnEdgeAdded != null) OnEdgeAdded(node);
+            if (_edges.Contains(edge)) throw new InvalidOperationException("The edge was already present in the graph.");
+            _edges.Add(edge);
+            edge.First.AddNeighbor(edge.Second);
+            edge.Second.AddNeighbor(edge.First);
+            if (OnEdgeAdded != null) OnEdgeAdded(edge);
         }
 
         /// <summary>
         /// Remove edge from the graph.
         /// </summary>
-        /// <param name="node"></param>
-        public void RemoveEdge(UndirectedEdge node)
+        /// <param name="edge"></param>
+        public void RemoveEdge(UndirectedEdge edge)
         {
-            if (!_edges.Remove(node)) throw new InvalidOperationException("The edge was not in the graph.");
-            if (OnEdgeRemoved != null) OnEdgeRemoved(node);
+            if (!_edges.Remove(edge)) throw new InvalidOperationException("The edge was not in the graph.");
+            edge.First.RemoveNeighbor(edge.Second);
+            edge.Second.RemoveNeighbor(edge.First);
+            if (OnEdgeRemoved != null) OnEdgeRemoved(edge);
+        }
+
+        /// <summary>
+        /// Computes the distances from start to all nodes lying on paths from start to end.
+        /// Note: this will not necessarily include all nodes in the graph, since some will not
+        /// lie on any simple path from start to end.
+        /// </summary>
+        public Dictionary<Node, int> ComputeDistances(Node start, Node end)
+        {
+            var q = new Queue<Node>();
+            var distances = new Dictionary<Node, int>();
+            distances[start] = 0;
+            q.Enqueue(start);
+            while (q.Count != 0)
+            {
+                Node current = q.Dequeue();
+                int dist = distances[current];
+                foreach (var neighbor in current.Neighbors)
+                {
+                    if (!distances.ContainsKey(neighbor))
+                    {
+                        distances[neighbor] = dist + 1;
+                        if (neighbor != end)
+                            q.Enqueue(neighbor);
+                    }
+                }
+            }
+            return distances;
         }
     }
 }

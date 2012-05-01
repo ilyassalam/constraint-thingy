@@ -37,6 +37,14 @@ namespace ConstraintThingyGUI
             type.LimitOccurences("forest", 1, 1);
             type.LimitOccurences("swamp", 1, 1);
             type.LimitOccurences("cave", 1, 1);
+            var contents = new FiniteDomainLabeling("contents",
+                                                    new FiniteDomain("Big monster", "Little monster", "Health pack",
+                                                                     "empty"));
+            contents.LimitOccurences("Big monster", 1, 1);
+            contents.LimitOccurences("Little monster", 1, 1);
+            contents.LimitOccurences("Health pack", 1, 1);
+            new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5,
+                              "Health pack", 10);
             solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
             graphCanvas.UpdateText();
         }

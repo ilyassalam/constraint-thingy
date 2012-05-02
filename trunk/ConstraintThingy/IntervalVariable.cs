@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Intervals;
 
 namespace ConstraintThingy
@@ -37,6 +35,13 @@ namespace ConstraintThingy
         public override bool IsEmpty
         {
             get { return Value.IsEmpty; }
+        }
+
+        public void NarrowTo(Interval restriction)
+        {
+            if (!Interval.Intersects(Value, restriction))
+                throw new Failure("Narrowed to empty set");
+            Value = Interval.Intersection(Value, restriction);
         }
 
         /// <summary>

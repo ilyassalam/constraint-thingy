@@ -56,8 +56,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IntervalSumLabeling.cs" />
     <Compile Include="Labeling.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="PathMinimumLabeling.cs" />
+    <Compile Include="ScoreLabeling.cs" />
     <Compile Include="UndirectedEdge.cs" />
     <Compile Include="UndirectedGraph.cs" />
     <Page Include="MainWindow.xaml">

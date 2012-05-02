@@ -54,6 +54,36 @@ namespace ConstraintThingy
         }
 
         /// <summary>
+        /// Represents a constraint, i.e. a relation that has to hold between a set of variables.
+        /// </summary>
+        protected Constraint(VType var, VType[] vars) : this (Prepend(var, vars))
+        { }
+
+        /// <summary>
+        /// Represents a constraint, i.e. a relation that has to hold between a set of variables.
+        /// </summary>
+        protected Constraint(VType var, VType var2, VType[] vars)
+            : this(Prepend(var, var2, vars))
+        { }
+
+        static VType[] Prepend(VType var, VType[] array)
+        {
+            VType[] newArray = new VType[array.Length+1];
+            newArray[0] = var;
+            array.CopyTo(newArray,1);
+            return newArray;
+        }
+
+        static VType[] Prepend(VType var, VType var2, VType[] array)
+        {
+            VType[] newArray = new VType[array.Length + 2];
+            newArray[0] = var;
+            newArray[1] = var2;
+            array.CopyTo(newArray, 2);
+            return newArray;
+        }
+
+        /// <summary>
         /// Variables constrained by the constraint.
         /// </summary>
         public VType[] Variables { get; private set; }

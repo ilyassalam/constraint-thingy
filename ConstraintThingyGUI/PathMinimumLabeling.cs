@@ -1,0 +1,68 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using ConstraintThingy;
+using Intervals;
+
+namespace ConstraintThingyGUI
+{
+    public class PathMinimumLabeling : IntervalLabeling
+    {
+        public PathMinimumLabeling(string name, IntervalLabeling integrand, Func<Node, IList<Node>> predecessors) : base(name, new Interval(float.MinValue, float.MinValue))
+        {
+            this.integrand = integrand;
+            this.predecessors = predecessors;
+        }
+
+        private readonly IntervalLabeling integrand;
+        private readonly Func<Node, IList<Node>> predecessors;
+
+        protected override IntervalVariable MakeVariable(Node n)
+        {
+            var result = base.MakeVariable(n);
+            new PathMinimumConstraint(result, integrand.ValueVariable(n), integrand.ValueVariables(predecessors(n)));
+            return result;
+        }
+
+        class PathMinimumConstraint : Constraint<IntervalVariable>
+        {
+            public PathMinimumConstraint(IntervalVariable sum, IntervalVariable value, IntervalVariable[] predecessors) : base(sum, value, predecessors)
+            {
+                // The code relies on the sum being the first element of Variables, value being the second, and the predecessors being the others.
+                Debug.Assert(Variables[0] == sum);
+                Debug.Assert(Variables[1] == value);
+            }
+
+            public override void Narrowed(Variable narrowedVariable)
+            {
+                // The integrand value or a predecessor was narrowed.
+                Interval min = Variables[2].Value;
+                for (int i = 3; i < Variables.Length; i++)
+                    min = Interval.Min(min, Variables[i].Value);
+
+                if (narrowedVariable == Variables[0])
+                {
+                    // The sum was narrowed
+                    Interval sum = Variables[0].Value;
+                    Variables[1].NarrowTo(new Interval(sum.LowerBound-min.UpperBound, sum.UpperBound-min.LowerBound));
+                    var integrand = Variables[0].Value;
+                    Interval newMin = new Interval(sum.LowerBound - integrand.UpperBound,
+                                                   sum.UpperBound - integrand.LowerBound);
+                    for (int i=3; i<Variables.Length; i++)
+                        Variables[i].NarrowTo(newMin);
+                }
+                else
+                {
+                    Interval calculatedSum = min + Variables[1].Value;
+                    // Update sum variable
+                    Variables[0].NarrowTo(calculatedSum);
+                }
+            }
+
+            public override void UpdateVariable(IntervalVariable var)
+            {
+                throw new NotImplementedException();
+            }
+        }
+    }
+}

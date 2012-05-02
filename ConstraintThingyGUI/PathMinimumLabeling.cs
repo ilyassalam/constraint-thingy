@@ -8,25 +8,30 @@ namespace ConstraintThingyGUI
 {
     public class PathMinimumLabeling : IntervalLabeling
     {
-        public PathMinimumLabeling(string name, IntervalLabeling integrand, Func<Node, IList<Node>> predecessors) : base(name, new Interval(float.MinValue, float.MinValue))
+        public PathMinimumLabeling(string name, IntervalLabeling integrand, Func<Node, IEnumerable<Node>> predecessors)
+            : base(name, new Interval(float.MinValue, float.MaxValue))
         {
             this.integrand = integrand;
             this.predecessors = predecessors;
         }
 
         private readonly IntervalLabeling integrand;
-        private readonly Func<Node, IList<Node>> predecessors;
+        private readonly Func<Node, IEnumerable<Node>> predecessors;
 
         protected override IntervalVariable MakeVariable(Node n)
         {
             var result = base.MakeVariable(n);
-            new PathMinimumConstraint(result, integrand.ValueVariable(n), integrand.ValueVariables(predecessors(n)));
+            var preds = new List<Node>(predecessors(n));
+            if (preds.Count>0)
+                new PathMinimumConstraint(result, integrand.ValueVariable(n), integrand.ValueVariables(preds));
+            else
+                result.Value = new Interval(0,0);
             return result;
         }
 
         class PathMinimumConstraint : Constraint<IntervalVariable>
         {
-            public PathMinimumConstraint(IntervalVariable sum, IntervalVariable value, IntervalVariable[] predecessors) : base(sum, value, predecessors)
+            public PathMinimumConstraint(IntervalVariable sum, IntervalVariable value, IEnumerable<IntervalVariable> predecessors) : base(sum, value, predecessors)
             {
                 // The code relies on the sum being the first element of Variables, value being the second, and the predecessors being the others.
                 Debug.Assert(Variables[0] == sum);
@@ -63,6 +68,23 @@ namespace ConstraintThingyGUI
             {
                 throw new NotImplementedException();
             }
+        }
+    }
+
+    public class StartEndPathLabeling : PathMinimumLabeling
+    {
+        public StartEndPathLabeling(string name, IntervalLabeling integrand, UndirectedGraph graph, float startValue, Node start, Node end)
+            : base(name, integrand, node => Predecessors(node, graph, start, end))
+        {
+            AssignVariableToNode(start, new IntervalVariable(name+" start", new Interval(startValue, startValue)));
+        }
+
+        private static IEnumerable<Node> Predecessors(Node node, UndirectedGraph graph, Node start, Node end)
+        {
+            foreach (var n in node.Neighbors)
+                if (graph.Distance(end, n) > graph.Distance(end, node)
+                    && graph.Distance(start, n)<= graph.Distance(start, end))
+                    yield return n;
         }
     }
 }

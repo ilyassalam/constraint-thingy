@@ -86,6 +86,16 @@ namespace ConstraintThingyGUI
         }
 
         /// <summary>
+        /// Returns all variables corresponding to the specified nodes.
+        /// For use in creating constraints.
+        /// </summary>
+        public IEnumerable<T> ValueVariables(IEnumerable<Node> nodes)
+        {
+            foreach (var node in nodes)
+                yield return ValueVariable(node);
+        }
+
+        /// <summary>
         /// Returns an array of all variables corresponding to the nodes of GRAPH.
         /// For use in creating constraints.
         /// </summary>
@@ -107,6 +117,14 @@ namespace ConstraintThingyGUI
         /// Creates a new variable to represent the value of this labeling on the specified node.
         /// </summary>
         protected abstract T MakeVariable(Node n);
+
+        /// <summary>
+        /// Forcibly assigns variable to node, bypassing MakeVariable.
+        /// </summary>
+        protected void AssignVariableToNode(Node node, T variable)
+        {
+            variables[node] = variable;
+        }
     }
 
     /// <summary>

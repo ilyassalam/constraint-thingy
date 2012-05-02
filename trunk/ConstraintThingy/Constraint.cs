@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace ConstraintThingy
 {
@@ -62,7 +63,7 @@ namespace ConstraintThingy
         /// <summary>
         /// Represents a constraint, i.e. a relation that has to hold between a set of variables.
         /// </summary>
-        protected Constraint(VType var, VType var2, VType[] vars)
+        protected Constraint(VType var, VType var2, IEnumerable<VType> vars)
             : this(Prepend(var, var2, vars))
         { }
 
@@ -74,13 +75,11 @@ namespace ConstraintThingy
             return newArray;
         }
 
-        static VType[] Prepend(VType var, VType var2, VType[] array)
+        static VType[] Prepend(VType var, VType var2, IEnumerable<VType> rest)
         {
-            VType[] newArray = new VType[array.Length + 2];
-            newArray[0] = var;
-            newArray[1] = var2;
-            array.CopyTo(newArray, 2);
-            return newArray;
+            var l = new List<VType> {var, var2};
+            l.AddRange(rest);
+            return l.ToArray();
         }
 
         /// <summary>

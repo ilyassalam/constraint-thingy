@@ -17,7 +17,8 @@ namespace ConstraintThingy
         {
             Name = name;
             lastSaveFramePointer = -1;
-            AllVariables.Add(this);
+            if (this is FiniteDomainVariable)
+                AllVariables.Add(this);
         }
 
         /// <summary>
@@ -192,6 +193,7 @@ namespace ConstraintThingy
     /// A variable whose value is of type T.
     /// </summary>
     /// <typeparam name="T">Datatype for value of variable</typeparam>
+    [System.Diagnostics.DebuggerDisplay("{Name}={Value}")]
     public class Variable<T> : Variable
     {
         /// <summary>

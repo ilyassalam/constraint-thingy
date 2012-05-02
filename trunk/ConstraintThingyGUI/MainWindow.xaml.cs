@@ -43,8 +43,11 @@ namespace ConstraintThingyGUI
             contents.LimitOccurences("Big monster", 1, 1);
             contents.LimitOccurences("Little monster", 1, 1);
             contents.LimitOccurences("Health pack", 1, 1);
-            new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5,
-                              "Health pack", 10);
+            var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5, 
+                "Health pack", 10);
+            var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.Nodes[1], graph.Nodes[2]);
+            totalHealth.ValueVariable(graph.Nodes[2]).NarrowTo(new Interval(1, float.MaxValue));
+
             solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
             graphCanvas.UpdateText();
         }

@@ -114,7 +114,7 @@ namespace ConstraintThingyGUI
         /// Note: this will not necessarily include all nodes in the graph, since some will not
         /// lie on any simple path from start to end.
         /// </summary>
-        public Dictionary<Node, int> ComputeDistances(Node start, Node end)
+        private Dictionary<Node, int> ComputeDistances(Node start)
         {
             var q = new Queue<Node>();
             var distances = new Dictionary<Node, int>();
@@ -129,12 +129,29 @@ namespace ConstraintThingyGUI
                     if (!distances.ContainsKey(neighbor))
                     {
                         distances[neighbor] = dist + 1;
-                        if (neighbor != end)
-                            q.Enqueue(neighbor);
+                        q.Enqueue(neighbor);
                     }
                 }
             }
             return distances;
+        }
+
+        private readonly Dictionary<Node, Dictionary<Node, int>> distanceMaps = new Dictionary<Node, Dictionary<Node, int>>();
+
+        Dictionary<Node, int> DistanceMap(Node n)
+        {
+            Dictionary<Node, int> result;
+            if (!distanceMaps.TryGetValue(n, out result))
+                result = distanceMaps[n] = ComputeDistances(n);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the distance from start node to end node.
+        /// </summary>
+        public int Distance(Node start, Node end)
+        {
+            return DistanceMap(start)[end];
         }
     }
 }

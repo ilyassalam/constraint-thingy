@@ -23,7 +23,7 @@ namespace ConstraintThingyGUI
             var result = base.MakeVariable(n);
             var preds = new List<Node>(predecessors(n));
             if (preds.Count>0)
-                new PathMinimumConstraint(result, integrand.ValueVariable(n), integrand.ValueVariables(preds));
+                new PathMinimumConstraint(result, integrand.ValueVariable(n), this.ValueVariables(preds));
             else
                 result.Value = new Interval(0,0);
             return result;
@@ -49,10 +49,12 @@ namespace ConstraintThingyGUI
                 {
                     // The sum was narrowed
                     Interval sum = Variables[0].Value;
-                    Variables[1].NarrowTo(new Interval(sum.LowerBound-min.UpperBound, sum.UpperBound-min.LowerBound));
-                    var integrand = Variables[0].Value;
-                    Interval newMin = new Interval(sum.LowerBound - integrand.UpperBound,
-                                                   sum.UpperBound - integrand.LowerBound);
+                    //Variables[1].NarrowTo(new Interval(sum.LowerBound-min.UpperBound, sum.UpperBound-min.LowerBound));
+                    Variables[1].NarrowTo(sum - min);
+                    var integrand = Variables[1].Value;
+                    //Interval newMin = new Interval(sum.LowerBound - integrand.UpperBound,
+                    //                               sum.UpperBound - integrand.LowerBound);
+                    Interval newMin = sum - integrand;
                     for (int i=3; i<Variables.Length; i++)
                         Variables[i].NarrowTo(newMin);
                 }
@@ -81,10 +83,13 @@ namespace ConstraintThingyGUI
 
         private static IEnumerable<Node> Predecessors(Node node, UndirectedGraph graph, Node start, Node end)
         {
-            foreach (var n in node.Neighbors)
-                if (graph.Distance(end, n) > graph.Distance(end, node)
-                    && graph.Distance(start, n)<= graph.Distance(start, end))
-                    yield return n;
+            //foreach (var n in node.Neighbors)
+            //    if (graph.Distance(end, n) > graph.Distance(end, node)
+            //        && graph.Distance(start, n)<= graph.Distance(start, end))
+            //        yield return n;
+            foreach (var e in graph.Edges)
+                if (e.Second == node)
+                    yield return e.First;
         }
     }
 }

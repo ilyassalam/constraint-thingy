@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Intervals;
 
 namespace ConstraintThingyGUI
 {
@@ -152,6 +153,63 @@ namespace ConstraintThingyGUI
         public int Distance(Node start, Node end)
         {
             return DistanceMap(start)[end];
+        }
+
+        /// <summary>
+        /// Loads a graph from a CSV file
+        /// </summary>
+        public static UndirectedGraph FromSpreadsheet(string path, float coordinateScaling)
+        {
+            var graph = new UndirectedGraph();
+            var data = Spreadsheet.ConvertAllNumbers(Spreadsheet.Read(path, ','));
+            var heading = new string[] {"Name", "X", "Y", "Connections"};
+
+            // Check heading
+            for (int i = 0; i<heading.Length; i++)
+                if ((data[0][i] as string) != heading[i])
+                    throw new Exception("Spreadsheet has the wrong format: Incorrect heading");
+
+            // Create all the nodes
+            for (int rowNumber=1; rowNumber<data.Length; rowNumber++)
+            {
+                var row = data[rowNumber];
+                if (!(row[0] is string && row[1] is double && row[2] is double))
+                    throw new Exception("Spreadsheet has the wrong format in row "+rowNumber);
+                graph.AddNode(new Node((string)row[0],
+                                new AABB(new Vector2(70+coordinateScaling*Convert.ToSingle(row[1]),
+                                                     70+coordinateScaling*Convert.ToSingle(row[2])),
+                                        130, 130)));
+            }
+
+            // Create all the edges
+            for (int rowNumber = 1; rowNumber < data.Length; rowNumber++)
+            {
+                var row = data[rowNumber];
+                Node start = graph.FindNode((string)row[0]);
+                for (int column = 3; column < row.Length; column++)
+                {
+                    if (!(row[column] is string))
+                        throw new Exception(string.Format("Spreadsheet has the wrong format in row {0}; bad connection name '{1}'.", rowNumber, row[column]));
+                    if ((string)row[column] != "")
+                    {
+                        Node end = graph.FindNode((string) row[column]);
+                        if (end == null)
+                            throw new Exception(string.Format("Unknown node '{0}'referenced in row {1}, column {2}",
+                                                              row[column], rowNumber, column));
+                        graph.AddEdge(new UndirectedEdge(start, end));
+                    }
+                }
+            }
+
+            return graph;
+        }
+
+        public Node FindNode(string name)
+        {
+            foreach (var n in Nodes)
+                if (n.Name == name)
+                    return n;
+            return null;
         }
     }
 }

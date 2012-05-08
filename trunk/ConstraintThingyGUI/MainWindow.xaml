@@ -13,8 +13,8 @@
             <RowDefinition Height="348*" />
         </Grid.RowDefinitions>
         <ConstraintThingyGUI:GraphCanvas x:Name="graphCanvas" Background="White" SnapsToDevicePixels="False" Grid.RowSpan="3" Grid.ColumnSpan="2">
-            <Button Content="Solve" Height="29" Name="solveButton" Width="81" Click="solveButton_Click" Canvas.Left="659" Canvas.Top="0" />
-            <Label Canvas.Left="662" Canvas.Top="35" Height="34" Name="solutionTime" Width="78" />
+            <Button Content="Solve" Height="29" Name="solveButton" Width="81" Click="solveButton_Click" Canvas.Left="0" Canvas.Top="0" />
+            <Label Canvas.Left="0" Canvas.Top="35" Height="34" Name="solutionTime" Width="78" />
         </ConstraintThingyGUI:GraphCanvas>
     </Grid>
 </Window>

@@ -59,8 +59,10 @@
     <Compile Include="IntervalSumLabeling.cs" />
     <Compile Include="Labeling.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="PathDAG.cs" />
     <Compile Include="PathMinimumLabeling.cs" />
     <Compile Include="ScoreLabeling.cs" />
+    <Compile Include="Spreadsheet.cs" />
     <Compile Include="UndirectedEdge.cs" />
     <Compile Include="UndirectedGraph.cs" />
     <Page Include="MainWindow.xaml">

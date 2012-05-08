@@ -23,6 +23,7 @@ namespace ConstraintThingyGUI
         public static string FormatLabels(Node n)
         {
             var result = new StringBuilder();
+            result.Append(n.Name + '\n');
             foreach (var l in AllLabelings)
                 result.AppendFormat("{0}={1}\n", l.Name, l[n]);
             return result.ToString();

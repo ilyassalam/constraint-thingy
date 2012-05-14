@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using ConstraintThingy;
 using Intervals;
+using Microsoft.Win32;
 
 namespace ConstraintThingyGUI
 {
@@ -32,8 +33,16 @@ namespace ConstraintThingyGUI
             //    graph.AddEdge(new UndirectedEdge(hub, n));
             //}
 
-            var graph = UndirectedGraph.FromSpreadsheet("c:/users/ian/desktop/residentevil.csv", 200);
-            
+            filePath = "c:/users/ian/desktop/residentevil.csv";
+            ReloadGraph();
+        }
+
+        private void ReloadGraph()
+        {
+            Variable.ResetStatistics();
+            Variable.ResetVariableSystemForTesting();
+            var graph = UndirectedGraph.FromSpreadsheet(filePath, 200);
+
             graphCanvas.Graph = UndirectedGraph.CurrentGraph = graph;
             var type = new FiniteDomainLabeling("type", new FiniteDomain("hub", "forest", "swamp", "cave", "other"));
             type.LimitOccurences("hub", 1, 1);
@@ -47,8 +56,8 @@ namespace ConstraintThingyGUI
             contents.LimitOccurences("Big monster", 1, 3);
             contents.LimitOccurences("Little monster", 1, 5);
             contents.LimitOccurences("Health pack", 1, 3);
-            var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5, 
-                "Health pack", 10);
+            var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5,
+                                          "Health pack", 10);
             var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N1"), graph.FindNode("N10"));
             foreach (var n in graph.Nodes)
                 totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue));
@@ -61,25 +70,26 @@ namespace ConstraintThingyGUI
         void NextSolution()
         {
             Cursor = Cursors.Wait;
-            timer.Reset();
-            timer.Start();
-            for (int i = 0; i < 1000000; i++)
-            {
-                try
-                {
-                    throw new Exception();
-                }
-                catch (Exception e)
-                {
-                }
-            }
-            timer.Stop();
-            double timeForException = timer.ElapsedMilliseconds/1000000.0;
+            //timer.Reset();
+            //timer.Start();
+            //for (int i = 0; i < 1000000; i++)
+            //{
+            //    try
+            //    {
+            //        throw new Exception();
+            //    }
+            //    catch (Exception e)
+            //    {
+            //    }
+            //}
+            //timer.Stop();
+            //double timeForException = timer.ElapsedMilliseconds/1000000.0;
             timer.Reset();
             timer.Start();
             solveButton.IsEnabled = solutionIterator.MoveNext();
             timer.Stop();
-            solutionTime.Content = string.Format("{0}ms; time for exception={1}", timer.ElapsedMilliseconds, timeForException);
+            //solutionTime.Content = string.Format("{0}ms; time for exception={1}", timer.ElapsedMilliseconds, timeForException);
+            solutionTime.Content = string.Format("{0}ms", timer.ElapsedMilliseconds);
             graphCanvas.UpdateText();
             Cursor = Cursors.Arrow;
         }
@@ -108,10 +118,15 @@ namespace ConstraintThingyGUI
 
         void ChooseFile()
         {
-            
+            OpenFileDialog d = new OpenFileDialog();
+            d.Filter = "CSV files (*.csv)|*.csv";
+            d.ShowDialog();
+            filePath = d.FileName;
+            ReloadGraph();
         }
 
-        private readonly IEnumerator<bool> solutionIterator;
+        private IEnumerator<bool> solutionIterator;
+        private string filePath;
 
         private void solveButton_Click(object sender, RoutedEventArgs e)
         {

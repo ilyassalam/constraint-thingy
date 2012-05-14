@@ -14,7 +14,9 @@
         </Grid.RowDefinitions>
         <ConstraintThingyGUI:GraphCanvas x:Name="graphCanvas" Background="White" SnapsToDevicePixels="False" Grid.RowSpan="3" Grid.ColumnSpan="2">
             <Button Content="Solve" Height="29" Name="solveButton" Width="81" Click="solveButton_Click" Canvas.Left="0" Canvas.Top="0" />
-            <Label Canvas.Left="0" Canvas.Top="35" Height="34" Name="solutionTime" Width="78" />
+            <Label Canvas.Left="0" Canvas.Top="39" Height="225" Name="solutionTime" Width="734" />
+            <Button Canvas.Left="87" Canvas.Top="0" Content="Solve All" Height="29" Name="solveAllButton" Width="81" Click="solveAllButton_Click" />
+            <Button Canvas.Left="174" Canvas.Top="0" Content="Select File" Height="29" Name="selectFileButton" Width="81" Click="selectFileButton_Click" />
         </ConstraintThingyGUI:GraphCanvas>
     </Grid>
 </Window>

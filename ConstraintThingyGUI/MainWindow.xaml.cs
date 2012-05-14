@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
@@ -43,9 +44,9 @@ namespace ConstraintThingyGUI
                                                     new FiniteDomain("Big monster", "Little monster", "Health pack",
                                                                      "empty"));
             contents[graph.FindNode("N1")] = "empty";
-            contents.LimitOccurences("Big monster", 1, 1);
-            contents.LimitOccurences("Little monster", 1, 1);
-            contents.LimitOccurences("Health pack", 1, 2);
+            contents.LimitOccurences("Big monster", 1, 3);
+            contents.LimitOccurences("Little monster", 1, 5);
+            contents.LimitOccurences("Health pack", 1, 3);
             var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5, 
                 "Health pack", 10);
             var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N1"), graph.FindNode("N10"));
@@ -62,11 +63,52 @@ namespace ConstraintThingyGUI
             Cursor = Cursors.Wait;
             timer.Reset();
             timer.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+                try
+                {
+                    throw new Exception();
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            timer.Stop();
+            double timeForException = timer.ElapsedMilliseconds/1000000.0;
+            timer.Reset();
+            timer.Start();
             solveButton.IsEnabled = solutionIterator.MoveNext();
             timer.Stop();
-            solutionTime.Content = string.Format("{0}ms", timer.ElapsedMilliseconds);
+            solutionTime.Content = string.Format("{0}ms; time for exception={1}", timer.ElapsedMilliseconds, timeForException);
             graphCanvas.UpdateText();
             Cursor = Cursors.Arrow;
+        }
+
+        void AllSolutions()
+        {
+            Cursor = Cursors.Wait;
+            System.GC.Collect(0);
+            int collections = System.GC.CollectionCount(0);
+            timer.Reset();
+            timer.Start();
+            int solutions = 0;
+            while (solutionIterator.MoveNext()) solutions++;
+            timer.Stop();
+            solutionTime.Content = string.Format("{0} solutions, {1}ms, mean={2}\nTotal variables {3}\nTotal backtracks {4}\nMaximum undo stack depth {5}\n{6} collections at generation 0", 
+                solutions, 
+                timer.ElapsedMilliseconds, 
+                ((double)timer.ElapsedMilliseconds) / solutions,
+                Variable.TotalVariables,
+                Variable.TotalBacktracks,
+                Variable.MaxUndoStackDepth,
+                System.GC.CollectionCount(0)-collections);
+            graphCanvas.UpdateText();
+            Cursor = Cursors.Arrow;
+        }
+
+        void ChooseFile()
+        {
+            
         }
 
         private readonly IEnumerator<bool> solutionIterator;
@@ -74,6 +116,16 @@ namespace ConstraintThingyGUI
         private void solveButton_Click(object sender, RoutedEventArgs e)
         {
             NextSolution();
+        }
+
+        private void solveAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            AllSolutions();
+        }
+
+        private void selectFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChooseFile();
         }
         
     }

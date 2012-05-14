@@ -60,9 +60,25 @@ namespace ConstraintThingy
                         definite++;
                 }
             }
-            if (possible<Min)
+            if (possible == Min)
+            {
+                // Force all variables that can have value to be that value.
+                foreach (var v in Variables)
+
+                    if (v.ContainsAny(valueBit))
+                        v.Value = valueBit;
+            }
+            else if (possible < Min)
                 throw new Failure("Too few possible occurances of Value in CardinalityConstraint");
-            if (definite>Max)
+            if (definite == Max)
+            {
+                // Rule out any remaining variables that are possible but not definite
+                foreach (var v in Variables)
+
+                    if (v.ContainsAny(valueBit) && !v.IsUnique)
+                        v.Value &= ~valueBit;
+            }
+            else if (definite > Max)
                 throw new Failure("Too many occurances of Value in CardinalityConstraint");
         }
 

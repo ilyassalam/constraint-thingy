@@ -8,13 +8,23 @@ namespace ConstraintThingy
     /// </summary>
     public abstract class Variable
     {
-        static readonly List<Variable> AllVariables = new List<Variable>(); 
+        static readonly List<Variable> AllVariables = new List<Variable>();
+        public static int TotalVariables { get; private set; }
+        public static int MaxUndoStackDepth { get; private set; }
+        public static int TotalBacktracks { get; private set; }
+
+        public static void ResetStatistics()
+        {
+            TotalBacktracks = TotalVariables = MaxUndoStackDepth = 0;
+        }
+
 
         /// <summary>
         /// Base initializer for variables; just sets the debugging name.
         /// </summary>
         protected Variable(string name)
         {
+            TotalVariables++;
             Name = name;
             lastSaveFramePointer = -1;
             if (this is FiniteDomainVariable)
@@ -172,6 +182,8 @@ namespace ConstraintThingy
         /// <param name="framePointer">Base address of the previous frame.</param>
         public static void RestoreValues(int framePointer)
         {
+            MaxUndoStackDepth = Math.Max(MaxUndoStackDepth, UndoStack.Count);
+            TotalBacktracks++;
             for (int c = StackDepth; c > framePointer; c--)
                 UndoStack.Pop().Restore();
             currentFramePointer = framePointer;

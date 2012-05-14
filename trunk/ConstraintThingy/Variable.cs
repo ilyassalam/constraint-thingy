@@ -197,6 +197,7 @@ namespace ConstraintThingy
         {
             UndoStack.Clear();
             currentFramePointer = -1;
+            AllVariables.Clear();
         }
         #endregion
     }

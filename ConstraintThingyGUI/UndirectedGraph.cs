@@ -162,7 +162,7 @@ namespace ConstraintThingyGUI
         {
             var graph = new UndirectedGraph();
             var data = Spreadsheet.ConvertAllNumbers(Spreadsheet.Read(path, ','));
-            var heading = new string[] {"Name", "X", "Y", "Connections"};
+            var heading = new string[] {"Name", "X", "Y", "Supports", "Connections"};
 
             // Check heading
             for (int i = 0; i<heading.Length; i++)
@@ -181,12 +181,21 @@ namespace ConstraintThingyGUI
                                         130, 130)));
             }
 
+            // Fill in support information
+            for (int rowNumber = 1; rowNumber < data.Length; rowNumber++)
+            {
+                object[] row = data[rowNumber];
+                string supportRecipient = row[3] as string;
+                if (!string.IsNullOrWhiteSpace(supportRecipient))
+                    graph.FindNode((string)row[0]).SetSupport(graph.FindNode(supportRecipient));
+            }
+
             // Create all the edges
             for (int rowNumber = 1; rowNumber < data.Length; rowNumber++)
             {
                 var row = data[rowNumber];
                 Node start = graph.FindNode((string)row[0]);
-                for (int column = 3; column < row.Length; column++)
+                for (int column = 4; column < row.Length; column++)
                 {
                     if (!(row[column] is string))
                         throw new Exception(string.Format("Spreadsheet has the wrong format in row {0}; bad connection name '{1}'.", rowNumber, row[column]));

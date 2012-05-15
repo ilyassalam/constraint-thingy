@@ -1,4 +1,6 @@
-﻿namespace ConstraintThingy
+﻿using System.Diagnostics;
+
+namespace ConstraintThingy
 {
     /// <summary>
     /// Represents one of the variables constrained by a constraint
@@ -6,11 +8,19 @@
     abstract class ConstraintArc
     {
         internal abstract void Update();
+
+        protected bool queuedForUpdate;
+
+        public void UnmarkForUpdate()
+        {
+            queuedForUpdate = false;
+        }
     }
 
     /// <summary>
     /// Represents one of the variables constrained by a constraint
     /// </summary>
+    [DebuggerDisplay("{Variable.Name}")]
     class ConstraintArc<VType> : ConstraintArc where VType : Variable
     {
         public ConstraintArc(Constraint<VType> c, VType v)
@@ -20,7 +30,6 @@
         }
         public Constraint<VType> Constraint { get; private set; }
         public VType Variable { get; private set; }
-        private bool queuedForUpdate;
 
         public void MarkForUpdate()
         {

@@ -12,7 +12,8 @@ namespace ConstraintThingy
 
         internal static void ClearWorklist()
         {
-            worklist.Clear();
+            while (worklist.Count > 0)
+                worklist.Dequeue().UnmarkForUpdate();
         }
 
         internal static void QueueForUpdate(ConstraintArc constraintArc)

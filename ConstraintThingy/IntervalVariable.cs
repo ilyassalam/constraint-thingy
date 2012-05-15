@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Intervals;
 
 namespace ConstraintThingy
@@ -82,6 +83,13 @@ namespace ConstraintThingy
 
                 RestoreValues(mark);
             }
+        }
+
+        public static IntervalVariable Sum(IEnumerable<IntervalVariable> vars)
+        {
+            IntervalVariable sum = new IntervalVariable("sum", new Interval(float.MinValue, float.MaxValue));
+            new IntervalSumConstraint(sum, vars.ToArray());
+            return sum;
         }
     }
 }

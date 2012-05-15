@@ -34,6 +34,11 @@ namespace ConstraintThingyGUI
         /// </summary>
         public static readonly List<Labeling> AllLabelings = new List<Labeling>();
 
+        public static void ResetLabelings()
+        {
+            AllLabelings.Clear();
+        }
+
         /// <summary>
         /// Name of label, for debugging purposes
         /// </summary>

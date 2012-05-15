@@ -33,7 +33,7 @@ namespace ConstraintThingy
         // narrows the value of a variable involved in the constraint
         private Interval NarrowConstraint(Variable narrowedVariable)
         {
-            Interval intersection;
+            Interval result;
 
             // Sum = var1 + var2 ... varN
             if (narrowedVariable == Sum)
@@ -46,7 +46,7 @@ namespace ConstraintThingy
                     value += Variables[i].Value;
                 }
 
-                intersection = Interval.Intersection(value, Sum.Value);
+                result = value; //Interval.Intersection(value, Sum.Value);
             }
             else
             {
@@ -65,10 +65,10 @@ namespace ConstraintThingy
 
                 if (varI == null) throw new InvalidOperationException("The narrowed variable was not found in this constraint's list of variables.");
 
-                intersection = Interval.Intersection(varI.Value, value);
+                result = value; // Interval.Intersection(varI.Value, value);
             }
 
-            return intersection;
+            return result;
         }
 
         /// <summary>
@@ -76,17 +76,17 @@ namespace ConstraintThingy
         /// </summary>
         public override void UpdateVariable(IntervalVariable var)
         {
-            Interval intersection = NarrowConstraint(var);
+            //Interval intersection = NarrowConstraint(var);
 
-            if (var.Value.Contains(intersection))
-            {
-                var.Value = intersection;
-            }
-            else
-            {
-                throw new Failure("The intersection interval was not in the allowable range for this variable.");
-            }
-
+            //if (var.Value.Contains(intersection))
+            //{
+            //    var.Value = intersection;
+            //}
+            //else
+            //{
+            //    throw new Failure("The intersection interval was not in the allowable range for this variable.");
+            //}
+            var.NarrowTo(NarrowConstraint(var));
         }
 
         

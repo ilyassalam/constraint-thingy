@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using ConstraintThingy;
+using System.Linq;
 using Intervals;
 
 namespace ConstraintThingyGUI
@@ -23,7 +24,11 @@ namespace ConstraintThingyGUI
             var result = base.MakeVariable(n);
             var preds = new List<Node>(predecessors(n));
             if (preds.Count>0)
-                new PathMinimumConstraint(result, integrand.ValueVariable(n), this.ValueVariables(preds));
+                new PathMinimumConstraint(result,
+                                          (n.Support.Count == 0)
+                                              ? integrand.ValueVariable(n)
+                                              : IntervalVariable.Sum(n.Support.Select(s => integrand.ValueVariable(s)).Concat(new[] { integrand.ValueVariable(n) })),
+                                          ValueVariables(preds));
             else
                 result.Value = new Interval(0,0);
             return result;
@@ -98,14 +103,16 @@ namespace ConstraintThingyGUI
             AssignVariableToNode(start, new IntervalVariable(name+" start", new Interval(startValue, startValue)));
         }
 
+// ReSharper disable UnusedParameter.Local
         private static IEnumerable<Node> Predecessors(Node node, UndirectedGraph graph, Node start, Node end)
+// ReSharper restore UnusedParameter.Local
         {
             //foreach (var n in node.Neighbors)
             //    if (graph.Distance(end, n) > graph.Distance(end, node)
             //        && graph.Distance(start, n)<= graph.Distance(start, end))
             //        yield return n;
             foreach (var e in graph.Edges)
-                if (e.Second == node)
+                if (e.Second == node && e.First.SupportRecipient == null)
                     yield return e.First;
         }
     }

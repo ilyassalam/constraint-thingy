@@ -177,7 +177,7 @@ namespace ConstraintThingyGUI
                     throw new Exception("Spreadsheet has the wrong format in row "+rowNumber);
                 graph.AddNode(new Node((string)row[0],
                                 new AABB(new Vector2(70+coordinateScaling*Convert.ToSingle(row[1]),
-                                                     70+coordinateScaling*Convert.ToSingle(row[2])),
+                                                     170+coordinateScaling*Convert.ToSingle(row[2])),
                                         130, 130)));
             }
 

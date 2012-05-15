@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Intervals;
 
@@ -42,6 +43,26 @@ namespace ConstraintThingyGUI
         {}
 
         readonly List<Node> neigbors = new List<Node>();
+
+        /// <summary>
+        /// Nodes that are in a cul-de-sac connected to this node.
+        /// Assumes this node is *not* in a cul-de-sc
+        /// </summary>
+        public readonly List<Node> Support = new List<Node>();
+
+        /// <summary>
+        /// If this node is in a cul-de-sac, this is the node that connects the cul-de-sac to the rest of the graph.
+        /// If this node is not on a cul-de-sac, this must be set to null.
+        /// </summary>
+        public Node SupportRecipient { get; private set; }
+
+        public void SetSupport(Node recipient)
+        {
+            if (recipient.SupportRecipient != null)
+                throw new Exception(string.Format("Node {0} set to support {1}, which already supports {2}", Name, recipient.Name, recipient.SupportRecipient.Name));
+            SupportRecipient = recipient;
+            recipient.Support.Add(this);
+        }
 
         /// <summary>
         /// All neighboring nodes of this node.

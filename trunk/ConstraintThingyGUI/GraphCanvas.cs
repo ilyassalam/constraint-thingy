@@ -88,6 +88,26 @@ namespace ConstraintThingyGUI
             _graph.OnEdgeRemoved += RemoveEdge;
         }
 
+        private static readonly Brush[] brushes = {
+                                             Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow, Brushes.Cyan,
+                                             Brushes.Magenta
+                                         };
+
+        private int brushCounter;
+        readonly Dictionary<Node,Brush> nodeBrushes = new Dictionary<Node, Brush>();
+
+        Brush Fill(Node n)
+        {
+            if (n.SupportRecipient != null)
+                return Fill(n.SupportRecipient);
+            if (n.Support.Count == 0)
+                return Brushes.White;
+            Brush b;
+            if (!nodeBrushes.TryGetValue(n, out b))
+                nodeBrushes[n] = b = brushes[brushCounter++ % brushes.Length];
+            return b;
+        }
+
         private void AddNode(Node node)
         {
             var rectangle = new Rectangle
@@ -96,7 +116,7 @@ namespace ConstraintThingyGUI
                                     Height = node.AABB.Height,
                                     RenderTransform = new TranslateTransform(node.AABB.UpperLeft.X, node.AABB.UpperLeft.Y),
                                     Stroke = Brushes.Black,
-                                    Fill = Brushes.Green
+                                    Fill = Fill(node)
                                 };
             nodeMapping[node] = rectangle;
             Children.Add(rectangle); 

@@ -60,7 +60,8 @@ namespace ConstraintThingyGUI
                                           "Health pack", 10);
             var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N1"), graph.FindNode("N10"));
             foreach (var n in graph.Nodes)
-                totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue));
+                if (n.SupportRecipient == null)
+                    totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue));
 
             solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
             graphCanvas.UpdateText();

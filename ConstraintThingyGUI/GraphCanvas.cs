@@ -1,211 +1,355 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Intervals;
+using CSharpUtils.Collections;
+using ConstraintThingy;
+using ConstraintThingyGUI;
 
 namespace ConstraintThingyGUI
 {
-    class GraphCanvas : Canvas 
+    class GraphCanvas : Canvas
     {
-        public GraphCanvas()
-        {
-            ClipToBounds = true;
-        }
-
-        public GraphCanvas(UndirectedGraph graph)
-        {
-            Graph = graph;
-        }
-
-        private Dictionary<Node, Rectangle> nodeMapping;
-        private Dictionary<Node, TextBlock> textMapping;
-        private Dictionary<UndirectedEdge, Line> edgeMapping;
-        private Dictionary<Node, List<UndirectedEdge>> nodesToEdges; 
-
-        private UndirectedGraph _graph;
-
-        public UndirectedGraph Graph
+        private IGraph _graph;
+        public IGraph Graph
         {
             get { return _graph; }
             set
             {
-                DetachGraph();
+                if (_graph != null) DetachGraph();
+
                 _graph = value;
-                AttachGraph();
+
+                if (_graph != null) AttachGraph();
             }
-        } 
+        }
 
         private void DetachGraph()
         {
-            if (nodeMapping != null)
+            foreach (var node in Graph.Nodes)
             {
-                foreach (var kvp in nodeMapping)
-                {
-                    Children.Remove(kvp.Value);
-                }
-
-                foreach (var kvp in textMapping)
-                {
-                    Children.Remove(kvp.Value);
-                }
-
-                _graph.OnNodeAdded -= AddNode;
-                _graph.OnNodeRemoved -= RemoveNode;
-
-                foreach (var kvp in edgeMapping)
-                {
-                    Children.Remove(kvp.Value);
-                }
-
-                _graph.OnEdgeAdded -= AddEdge;
-                _graph.OnEdgeRemoved -= RemoveEdge;
+                RemoveNode(node);
             }
 
-            nodeMapping = new Dictionary<Node, Rectangle>();
-            textMapping = new Dictionary<Node, TextBlock>();
-            edgeMapping = new Dictionary<UndirectedEdge, Line>();
-            nodesToEdges = new Dictionary<Node, List<UndirectedEdge>>();
+            foreach (var edge in Graph.Edges)
+            {
+                RemoveEdge(edge);
+            }
+
+            Graph.NodeAdded -= AddNode;
+            Graph.EdgeAdded -= AddEdge;
+
+            Graph.NodeRemoved -= RemoveNode;
+            Graph.EdgeRemoved -= RemoveEdge;
         }
 
         private void AttachGraph()
         {
-            foreach (var node in _graph.Nodes)
+            foreach (var node in Graph.Nodes)
             {
                 AddNode(node);
             }
 
-            _graph.OnNodeAdded += AddNode;
-            _graph.OnNodeRemoved += RemoveNode;
-
-            foreach (var edge in _graph.Edges)
+            foreach (var edge in Graph.Edges)
             {
                 AddEdge(edge);
             }
 
-            _graph.OnEdgeAdded += AddEdge;
-            _graph.OnEdgeRemoved += RemoveEdge;
+            Graph.NodeAdded += AddNode;
+            Graph.EdgeAdded += AddEdge;
+
+            Graph.NodeRemoved += RemoveNode;
+            Graph.EdgeRemoved += RemoveEdge;
         }
 
-        private static readonly Brush[] brushes = {
-                                             Brushes.Red, Brushes.Green, Brushes.Blue, Brushes.Yellow, Brushes.Cyan,
-                                             Brushes.Magenta
-                                         };
+        private readonly Dictionary<INode, Shape> _nodesToShapes = new Dictionary<INode, Shape>();
 
-        private int brushCounter;
-        readonly Dictionary<Node,Brush> nodeBrushes = new Dictionary<Node, Brush>();
+        private readonly Dictionary<IEdge, Line> _edgesToLines = new Dictionary<IEdge, Line>(); 
 
-        Brush Fill(Node n)
+        private readonly Dictionary<INode, Action> _detachmentActions = new Dictionary<INode, Action>();
+
+        private void RegisterDetachmentAction(INode node, Action action)
         {
-            if (n.SupportRecipient != null)
-                return Fill(n.SupportRecipient);
-            if (n.Support.Count == 0)
-                return Brushes.White;
-            Brush b;
-            if (!nodeBrushes.TryGetValue(n, out b))
-                nodeBrushes[n] = b = brushes[brushCounter++ % brushes.Length];
-            return b;
+            Action detachmentAction;
+            if (_detachmentActions.TryGetValue(node, out detachmentAction))
+            {
+                detachmentAction += action;
+            }
+
+            _detachmentActions[node] = detachmentAction;
         }
 
-        private void AddNode(Node node)
+        private void AddNode(INode node)
         {
-            var rectangle = new Rectangle
-                                {
-                                    Width = node.AABB.Width,
-                                    Height = node.AABB.Height,
-                                    RenderTransform = new TranslateTransform(node.AABB.UpperLeft.X, node.AABB.UpperLeft.Y),
-                                    Stroke = Brushes.Black,
-                                    Fill = Fill(node)
-                                };
-            nodeMapping[node] = rectangle;
-            Children.Add(rectangle); 
-            
-            var text = new TextBlock
-                           {
-                               Width = node.AABB.Width,
-                               Height = node.AABB.Height,
-                               RenderTransform = new TranslateTransform(node.AABB.UpperLeft.X, node.AABB.UpperLeft.Y)
-                           };
+            Shape shape;
 
-            textMapping[node] = text;
-            text.Text = Labeling.FormatLabels(node);
-            Children.Add(text);
+            if (node is AABBNode)
+            {
+                var aabbNode = node as AABBNode;
+
+                shape = new Rectangle()
+                            {
+                                Width = aabbNode.AABB.Width,
+                                Height = aabbNode.AABB.Height,
+
+                            };
+
+                Action<Vector2> sizeChanged = vector2 =>
+                                                  {
+                                                      shape.Width = vector2.X;
+                                                      shape.Height = vector2.Y;
+                                                  };
+
+                aabbNode.SizeChanged += sizeChanged;
+
+                RegisterDetachmentAction(aabbNode, () => aabbNode.SizeChanged -= sizeChanged);
+            }
+            else if (node is CircleNode)
+            {
+                var circleNode = node as CircleNode;
+
+                shape = new Ellipse()
+                            {
+                                Width = circleNode.Radius * 2,
+                                Height = circleNode.Radius * 2
+                            };
+
+                Action<double> radiusChanged = r =>
+                                                   {
+                                                       shape.Width = r * 2;
+                                                       shape.Height = r * 2;
+                                                   };
+
+                circleNode.RadiusChanged += radiusChanged;
+
+                RegisterDetachmentAction(circleNode, () => circleNode.RadiusChanged -= radiusChanged);
+            }
+            else throw new NotImplementedException();
+
+            shape.RenderTransform = new TranslateTransform(node.Position.X - shape.Width / 2, node.Position.Y - shape.Height / 2);
+            shape.Fill = Brushes.SlateGray;
+            shape.StrokeThickness = 5;
+
+            Action<Vector2> positionChanged = vector2 =>
+                                                  {
+                                                      shape.RenderTransform = new TranslateTransform(node.Position.X - shape.Width / 2, node.Position.Y - shape.Height / 2);
+                                                  };
+
+            node.PositionChanged += positionChanged;
+
+            RegisterDetachmentAction(node, ()=> node.PositionChanged -= positionChanged);
+
+            _nodesToShapes.Add(node, shape);
+
+            SetUpDragShape(node, shape);
+
+            Children.Add(shape);
         }
 
-        public void UpdateText()
+        static readonly double MinimumHorizontalDragDistance = SystemParameters.MinimumHorizontalDragDistance / 4;
+        static readonly double MinimumVerticalDragDistance = SystemParameters.MinimumVerticalDragDistance / 4;
+
+        enum NodeState { Clicked, Dragging, Unclicked }
+
+        private INode _lastClicked;
+
+        public event Action<INode> OnNodeSelected;
+
+        public void SelectNode(INode node)
         {
-            foreach (var pair in textMapping)
-                pair.Value.Text = Labeling.FormatLabels(pair.Key);
+            DeselectNode();
+
+            _lastClicked = node;
+            _nodesToShapes[node].Stroke = Brushes.CornflowerBlue;
+
+            if (OnNodeSelected != null) OnNodeSelected(node);
         }
 
-        private void RemoveNode(Node node)
+        private void DeselectNode()
         {
-            Children.Remove(nodeMapping[node]);
-            Children.Remove(textMapping[node]);
-
-            nodeMapping.Remove(node);
-            textMapping.Remove(node);
+            if (_lastClicked != null)
+            {
+                _nodesToShapes[_lastClicked].Stroke = Brushes.Transparent;   
+            }
+            _lastClicked = null;
         }
 
-        private void AddEdge(UndirectedEdge edge)
+        private void SetUpDragShape(INode node, Shape shape)
         {
-            AssociateNodeWithEdge(edge.First, edge);
-            AssociateNodeWithEdge(edge.Second, edge);
+            NodeState state = NodeState.Unclicked;
 
-            Vector2 center1 = edge.First.AABB.Center;
-            Vector2 center2 = edge.Second.AABB.Center;
+            Vector2 elementStartPosition = new Vector2();
+            Point startPosition = new Point();
 
-            var line = new Line
-                           {
-                               X1 = center1.X,
-                               Y1 = center1.Y,
+            MouseButtonEventHandler mouseLeftDown = (o, args) =>
+                                                        {
+                                                            state = NodeState.Clicked;
+                                                            shape.CaptureMouse();
+                                                            
+                                                            if (_lastClicked != null && _lastClicked != node)
+                                                            {
+                                                                if (!_lastClicked.Neighbors.Contains(node))
+                                                                {
+                                                                    _lastClicked.AddEdge(new Edge(_lastClicked, node));
+                                                                    node.AddEdge(new Edge(node, _lastClicked));   
+                                                                }
+                                                            }
 
-                               X2 = center2.X,
-                               Y2 = center2.Y,
+                                                            SelectNode(node);
+                                                            
+                                                            elementStartPosition = node.Position;
+                                                            startPosition = args.GetPosition(this);
+                                                        };
 
-                               Stroke = Brushes.Black
-                           };
+            MouseButtonEventHandler mouseUp = (o, args) =>
+                                                    {
+                                                        state = NodeState.Unclicked;
+                                                        shape.ReleaseMouseCapture();
+                                                    };
 
-            edgeMapping.Add(edge, line);
+            MouseEventHandler mouseMove = (o, args) =>
+                                              {
+                                                  Point currentPosition = args.GetPosition(this);
+
+                                                  Vector difference = currentPosition - startPosition;
+
+                                                  if (state == NodeState.Clicked)
+                                                  {
+                                                      if (Math.Abs(difference.X) >= MinimumHorizontalDragDistance && Math.Abs(difference.Y) >= MinimumVerticalDragDistance)
+                                                      {
+                                                          state = NodeState.Dragging;
+                                                      }
+                                                  }
+
+                                                  if (state == NodeState.Dragging)
+                                                  {
+                                                      DeselectNode();
+                                                      node.Position = new Vector2(elementStartPosition.X + difference.X, elementStartPosition.Y + difference.Y);
+                                                  }
+                                              };
+
+            shape.MouseLeftButtonDown += mouseLeftDown;
+            shape.MouseMove += mouseMove;
+            shape.MouseLeftButtonUp += mouseUp;
+
+            RegisterDetachmentAction(node, () =>
+                                               {
+                                                   shape.MouseLeftButtonDown -= mouseLeftDown;
+                                                   shape.MouseMove -= mouseMove;
+                                                   shape.MouseLeftButtonUp -= mouseUp;
+                                               });
+        }
+
+        private void RemoveNode(INode node)
+        {
+            Action action;
+            if (_detachmentActions.TryGetValue(node, out action))
+            {
+                action();
+                _detachmentActions.Remove(node);
+            }
+
+            Children.Remove(_nodesToShapes[node]);
+
+            _nodesToShapes.Remove(node);
+        }
+
+        private void AddEdge(IEdge edge)
+        {
+            Line line = new Line()
+                            {
+                                StrokeThickness = 2,
+                                Stroke = Brushes.Black,
+
+                                X1 = edge.From.Position.X,
+                                Y1 = edge.From.Position.Y,
+                                
+                                X2 = edge.To.Position.X,
+                                Y2 = edge.To.Position.Y,
+                            };
+
+            SetZIndex(line, -1);
+
+            edge.From.PositionChanged += vector2 =>
+                                             {
+                                                 line.X1 = vector2.X;
+                                                 line.Y1 = vector2.Y;
+                                             };
+
+            edge.To.PositionChanged += vector2 =>
+                                           {
+                                               line.X2 = vector2.X;
+                                               line.Y2 = vector2.Y;
+                                           };
+
+            _edgesToLines.Add(edge, line);
 
             Children.Add(line);
         }
 
-        private void AssociateNodeWithEdge(Node node, UndirectedEdge edge)
+        private void RemoveEdge(IEdge edge)
         {
-            if (!nodeMapping.ContainsKey(node)) throw new InvalidOperationException("A node referenced by an edge was not in the graph.");
+            Children.Remove(_edgesToLines[edge]);
 
-            List<UndirectedEdge> edges;
-            nodesToEdges.TryGetValue(node, out edges);
-
-            if (edges == null)
-            {
-                edges = new List<UndirectedEdge>();
-                nodesToEdges[node] = edges;
-            }
-
-            edges.Add(edge);
+            _edgesToLines.Remove(edge);
         }
 
-        private void UnassociateNodeWithEdge(Node node, UndirectedEdge edge)
+        public GraphCanvas()
         {
-            List<UndirectedEdge> edges;
-            nodesToEdges.TryGetValue(node, out edges);
+            Graph = new Graph();
 
-            if (edges != null)
+            ClipToBounds = true;
+            DragEnter += OnDragEnter;
+            Drop += OnDrop;
+        }
+
+        private void OnDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DragableAreaTypeListItem.AreaTypeDataFormat))
             {
-                edges.Remove(edge);
+                Point position = e.GetPosition(this);
+
+                var data = e.Data.GetData(DragableAreaTypeListItem.AreaTypeDataFormat);
+
+                AreaType areaType = (AreaType) data;
+
+                Node node;
+
+                switch (areaType)
+                {
+                    case AreaType.Rectangle:
+                        node = new AABBNode
+                                   {
+                                       AABB = new AABB(new Vector2(position.X, position.Y), 50, 50)
+                                   };
+                        break;
+                    case AreaType.Circle:
+                        node = new CircleNode()
+                                   {
+                                       Position = new Vector2(position.X, position.Y),
+                                       Radius = 25
+                                   };
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                
+                Graph.AddNode(node);
             }
         }
 
-        private void RemoveEdge(UndirectedEdge edge)
+        private void OnDragEnter(object sender, DragEventArgs e)
         {
-            Children.Remove(edgeMapping[edge]);
-            edgeMapping.Remove(edge);
-
-            UnassociateNodeWithEdge(edge.First, edge);
-            UnassociateNodeWithEdge(edge.Second, edge);
+            if (!e.Data.GetDataPresent(DragableAreaTypeListItem.AreaTypeDataFormat))
+            {
+                e.Effects = DragDropEffects.None;
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2B0CFE51-6220-4165-B093-BF1F6732F1E3}</ProjectGuid>
+    <ProjectGuid>{3B221AD8-592F-4DF3-871C-23968E7C6DC8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ConstraintThingyGUI</RootNamespace>
@@ -37,6 +37,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AvalonDock, Version=2.0.795.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\avalon-dock\AvalonDock.dll</HintPath>
+    </Reference>
+    <Reference Include="AvalonDock.Themes">
+      <HintPath>..\lib\avalon-dock\AvalonDock.Themes.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -56,15 +63,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="IntervalSumLabeling.cs" />
-    <Compile Include="Labeling.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="PathDAG.cs" />
-    <Compile Include="PathMinimumLabeling.cs" />
-    <Compile Include="ScoreLabeling.cs" />
-    <Compile Include="Spreadsheet.cs" />
-    <Compile Include="UndirectedEdge.cs" />
-    <Compile Include="UndirectedGraph.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -73,6 +71,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DragableConstraintListItem.cs" />
     <Compile Include="GraphCanvas.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -105,12 +104,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConstraintThingy\ConstraintThingy.csproj">
-      <Project>{6B64D5A2-2A67-4B67-8B27-24B54FC72AF1}</Project>
+      <Project>{1ABC9DB0-80D9-43A4-A1B1-CC0C74F997A3}</Project>
       <Name>ConstraintThingy</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Intervals\Intervals.csproj">
-      <Project>{94B8C1D0-4FE3-4DB2-B84E-E5EEB694285F}</Project>
-      <Name>Intervals</Name>
+    <ProjectReference Include="..\lib\csharp-utils\CSharpUtils\CSharpUtils.csproj">
+      <Project>{B32A52BB-656F-4985-9CB6-9DC3F995BD21}</Project>
+      <Name>CSharpUtils</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

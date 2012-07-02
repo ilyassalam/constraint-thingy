@@ -1,22 +1,116 @@
 ﻿<Window x:Class="ConstraintThingyGUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ConstraintThingyGUI="clr-namespace:ConstraintThingyGUI" Title="MainWindow" Height="478" Width="762">
+        xmlns:ConstraintThingyGUI="clr-namespace:ConstraintThingyGUI" xmlns:avalondock="http://avalondock.codeplex.com"
+        xmlns:ad="clr-namespace:AvalonDock;assembly=AvalonDock" Title="ConstraintThingyGUI" Height="496" Width="700">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="675*" />
-            <ColumnDefinition Width="65*" />
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="88*" />
-            <RowDefinition Height="77*" />
-            <RowDefinition Height="348*" />
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
-        <ConstraintThingyGUI:GraphCanvas x:Name="graphCanvas" Background="White" SnapsToDevicePixels="False" Grid.RowSpan="3" Grid.ColumnSpan="2">
-            <Button Content="Solve" Height="29" Name="solveButton" Width="81" Click="solveButton_Click" Canvas.Left="0" Canvas.Top="0" />
-            <Label Canvas.Left="0" Canvas.Top="39" Height="225" Name="solutionTime" Width="734" />
-            <Button Canvas.Left="87" Canvas.Top="0" Content="Solve All" Height="29" Name="solveAllButton" Width="81" Click="solveAllButton_Click" />
-            <Button Canvas.Left="174" Canvas.Top="0" Content="Select File" Height="29" Name="selectFileButton" Width="81" Click="selectFileButton_Click" />
-        </ConstraintThingyGUI:GraphCanvas>
+        
+        <Menu>
+            <MenuItem Header="File">
+                <MenuItem Header="Exit"/>
+            </MenuItem>
+        </Menu>
+
+        <ad:DockingManager x:Name="dockManager" Grid.Row="1">
+            <ad:ResizingPanel Orientation="Vertical">
+                <ad:ResizingPanel Orientation="Horizontal">
+                    <ad:DockablePane ad:ResizingPanel.ResizeWidth="150">
+                        <ad:DockableContent x:Name="toolbox" Title="Toolbox" IsCloseable="False">
+                            <StackPanel>
+                                <Expander Header="Area Types" >
+                                    <ListBox>
+                                        <ConstraintThingyGUI:DragableAreaTypeListItem Content="Rectangle" AreaType="Rectangle"/>
+                                        <ConstraintThingyGUI:DragableAreaTypeListItem Content="Circle" AreaType="Circle"/>
+                                    </ListBox>
+                                </Expander>
+                                
+                                <Expander Header="Variables">
+                                    <ListBox>
+                                        <ListBoxItem Content="Tool1"/>
+                                        <ListBoxItem Content="Tool2"/>
+                                        <ListBoxItem Content="Tool3"/>
+                                    </ListBox>
+                                </Expander>
+                                
+                                <Expander Header="Constraints">
+                                    <ListBox>
+                                        <ListBoxItem Content="Tool1"/>
+                                        <ListBoxItem Content="Tool2"/>
+                                        <ListBoxItem Content="Tool3"/>
+                                    </ListBox>
+                                </Expander>
+                            </StackPanel>
+                        </ad:DockableContent>
+                    </ad:DockablePane>
+                    <ad:DocumentPane>
+                        <ad:DocumentContent Title="MyDocument!" IsCloseable="false" IsFloatingAllowed="False">
+                            <ConstraintThingyGUI:GraphCanvas AllowDrop="True" Background="White"></ConstraintThingyGUI:GraphCanvas>
+                        </ad:DocumentContent>
+                    </ad:DocumentPane>
+                    <ad:DockablePane ad:ResizingPanel.ResizeWidth="150">
+                        <ad:DockableContent x:Name="nodeProperties" Title="Node Properties" IsCloseable="False">
+                            <StackPanel>
+                                <TextBlock Text="Name: ____"></TextBlock>
+                                <TextBlock Text="Position: ____"></TextBlock>
+                                <TextBlock Text="Width: ____"></TextBlock>
+                                <TextBlock Text="Height: ____"></TextBlock>
+                                <Expander Header="Variables">
+                                    <ListBox>
+                                        <ListBoxItem Content="Tool1"/>
+                                        <ListBoxItem Content="Tool2"/>
+                                        <ListBoxItem Content="Tool3"/>
+                                    </ListBox>
+                                </Expander>
+                                <Expander Header="Variables">
+                                    <ListBox>
+                                        <ListBoxItem Content="Tool1"/>
+                                        <ListBoxItem Content="Tool2"/>
+                                        <ListBoxItem Content="Tool3"/>
+                                    </ListBox>
+                                </Expander>
+                            </StackPanel>
+                        </ad:DockableContent>
+                        <ad:DockableContent x:Name="constraintSystem" Title="Constraint System" IsCloseable="False">
+                            <StackPanel VerticalAlignment="Bottom">
+                                
+                                
+                                <Button Height="35">
+                                    <TextBlock Text="GENERATE" FontSize="16" FontWeight="Bold"></TextBlock>
+                                </Button>
+                            </StackPanel>
+                        </ad:DockableContent>
+                    </ad:DockablePane>
+                </ad:ResizingPanel>
+                <ad:DockablePane ad:ResizingPanel.ResizeHeight="100">
+                    <ad:DockableContent Title="Errors" x:Name="errorsContent">
+                        <ListView>
+                            <ListView.View>
+                                <GridView>
+                                    <GridView.Columns>
+                                        <GridViewColumn Header="Error"/>
+                                        <GridViewColumn Header="Page"/>
+                                        <GridViewColumn Header="File"/>
+                                        <GridViewColumn Header="Row"/>
+                                    </GridView.Columns>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </ad:DockableContent>
+                    <ad:DockableContent Title="Output" x:Name="output">
+                        <TextBox IsReadOnly="True" AcceptsReturn="True"/>
+                    </ad:DockableContent>
+                </ad:DockablePane>
+            </ad:ResizingPanel>
+        </ad:DockingManager>
+
+        <StatusBar Grid.Row="2">
+            <StatusBarItem Content="Constraint Thingy"/>
+        </StatusBar>
+        
     </Grid>
 </Window>

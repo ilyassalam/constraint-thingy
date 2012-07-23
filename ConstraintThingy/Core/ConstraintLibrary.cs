@@ -183,6 +183,84 @@ namespace ConstraintThingy
         #region Reals
 
         /// <summary>
+        /// Creates a real variable whose value can be any one of a set of intervals, which correspond to values of the specified finite domain
+        /// </summary>
+        public static RealVariable ScoreVariable<T>(FiniteDomainVariable<T> finiteDomainVariable, ScoreMapping<T> scoreMapping)
+        {
+            RealVariable realVariable = new RealVariable(finiteDomainVariable.ConstraintThingySolver, null, RealVariable.DefaultRange);
+
+            Constraint.InRange(realVariable, scoreMapping.Select(pair => pair.Second).Aggregate(Interval.Union));
+
+            Constraint.Score(realVariable, finiteDomainVariable, scoreMapping);
+
+            return realVariable;
+        }
+
+        /// <summary>
+        /// Creates and returns a real variable which represents the maximum of <paramref name="a"/> and <paramref name="b"/>
+        /// </summary>
+        public static RealVariable Maximize(RealVariable a, RealVariable b)
+        {
+            RealVariable max;
+
+            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Maximize, a, b, out max))
+            {
+                return max;
+            }
+
+            max = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+
+            // calculate the possible range for the sum so we improve the speed of the search
+            Constraint.InRange(max, MultiInterval.Max(a.AllowableValues.First, b.AllowableValues.First));
+
+            Max(max, a, b);
+
+            a.ConstraintThingySolver.SubexpressionEliminator.Store(Maximize, a, b, max);
+
+            return max;
+        }
+
+        /// <summary>
+        /// Creates and returns a real variable which represents the minimum of <paramref name="a"/> and <paramref name="b"/>
+        /// </summary>
+        public static RealVariable Minimize(RealVariable a, RealVariable b)
+        {
+            RealVariable min;
+
+            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Minimize, a, b, out min))
+            {
+                return min;
+            }
+
+            min = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+
+            // calculate the possible range for the sum so we improve the speed of the search
+            Constraint.InRange(min, MultiInterval.Min(a.AllowableValues.First, b.AllowableValues.First));
+
+            Min(min, a, b);
+
+            a.ConstraintThingySolver.SubexpressionEliminator.Store(Minimize, a, b, min);
+
+            return min;
+        }
+
+        /// <summary>
+        /// Constrains <paramref name="max"/> to be the maximum of <paramref name="a"/> and <paramref name="b"/>
+        /// </summary>
+        public static void Max(RealVariable max, RealVariable a, RealVariable b)
+        {
+            new RealMaxConstraint(max, a, b);
+        }
+
+        /// <summary>
+        /// Constrains <paramref name="min"/> to be the minimum of <paramref name="a"/> and <paramref name="b"/>
+        /// </summary>
+        public static void Min(RealVariable min, RealVariable a, RealVariable b)
+        {
+            new RealMinConstraint(min, a, b);
+        }
+
+        /// <summary>
         /// Constrains <paramref name="sum"/> to be the sum of <paramref name="a"/> and <paramref name="b"/>
         /// </summary>
         public static void Sum(RealVariable sum, RealVariable a, RealVariable b)
@@ -724,7 +802,7 @@ namespace ConstraintThingy
         /// <summary>
         /// Creates a new score constraint, which constrains the value of the <paramref name="score"/> variable to be some assignment of a value in the <paramref name="finiteDomainVariable"/> based on the specified <paramref name="scoreMapping"/> from finite domain items to real-valued intervals
         /// </summary>
-        public static void ScoreConstraint<T>(RealVariable score, FiniteDomainVariable<T> finiteDomainVariable, ScoreMapping<T> scoreMapping)
+        public static void Score<T>(RealVariable score, FiniteDomainVariable<T> finiteDomainVariable, ScoreMapping<T> scoreMapping)
         {
             new ScoreContraint<T>(score, finiteDomainVariable, scoreMapping);
         }

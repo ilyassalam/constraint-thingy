@@ -21,7 +21,7 @@ namespace ConstraintThingy
 
         protected internal override void UpdateVariable(IntegerVariable variable, out bool success)
         {
-#warning this can probably be sped up with the ability to split intervals, but has the downside of we can't guarantee how many times the interval will be subdivided
+            // this can probably be sped up with the ability to split intervals, but has the downside of we can't guarantee how many times the interval will be subdivided
 
             if (Left.IsUnique && Right.IsUnique)
             {

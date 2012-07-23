@@ -28,6 +28,8 @@ namespace ConstraintThingy
             : base(constraintThingySolver, name, finiteDomain.CreateBitSet(items))
         {
             FiniteDomain = finiteDomain;
+
+            Priority = 1;
         }
 
         /// <summary>

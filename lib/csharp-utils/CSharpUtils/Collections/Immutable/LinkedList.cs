@@ -586,7 +586,8 @@ namespace CSharpUtils.Collections
 
             while (true)
             {
-                if (ReferenceEquals(self, LL<T>.Nil))
+                if (ReferenceEquals(self, other)) return true;
+                else if (ReferenceEquals(self, LL<T>.Nil))
                 {
                     if (ReferenceEquals(other, LL<T>.Nil))
                     {

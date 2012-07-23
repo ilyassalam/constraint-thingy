@@ -122,6 +122,16 @@ namespace ConstraintThingy
     public abstract class Variable : ConstraintComponent
     {
         /// <summary>
+        /// True if the variable is required to be narrowed to a unique value
+        /// </summary>
+        public bool RequireUnique { get; set; }
+
+        /// <summary>
+        /// Helps guide the order of expansion
+        /// </summary>
+        public int Priority { get; set; }
+
+        /// <summary>
         /// The name of the variable
         /// </summary>
         public String Name { get; internal set; }
@@ -131,6 +141,8 @@ namespace ConstraintThingy
         /// </summary>
         internal Variable(ConstraintThingySolver constraintThingySolver, String name) : base(constraintThingySolver)
         {
+            RequireUnique = true;
+
             Name = name;
 
             if (constraintThingySolver != null) constraintThingySolver.AddVariable(this);

@@ -342,20 +342,6 @@ namespace ConstraintThingy
             return new IntegerVariable(this, null, IntegerVariable.DefaultRange);
         }
 
-        /// <summary>
-        /// Creates a real variable whose value can be any one of a set of intervals, which correspond to values of the specified finite domain
-        /// </summary>
-        public RealVariable CreateEnumeratedReal<T>(FiniteDomainVariable<T> finiteDomainVariable, ScoreMapping<T> scoreMapping)
-        {
-            RealVariable realVariable = CreateRealVariable();
-            
-            Constraint.InRange(realVariable, scoreMapping.Select(pair => pair.Second).Aggregate(Interval.Union));
-
-            Constraint.ScoreConstraint(realVariable, finiteDomainVariable, scoreMapping);
-
-            return realVariable;
-        }
-
         private bool _startedSolving = false;
 
         /// <summary>
@@ -375,7 +361,10 @@ namespace ConstraintThingy
                 _startedSolving = true;
 
                 // shuffle only if the random option has been set
-                Variable[] variables = ExpansionOrder == ExpansionOrder.Random ? (_variables.ToShuffled(Random)) : _variables.ToArray();
+                Variable[] variables = ExpansionOrder == ExpansionOrder.Random ? (_variables.Where(var => var.RequireUnique).ToShuffled(Random)) : _variables.ToArray();
+
+                // higher priorities first
+                Array.Sort(variables, (a, b) => -a.Priority.CompareTo(b.Priority));
 
                 uint solutionNumber = 0;
 

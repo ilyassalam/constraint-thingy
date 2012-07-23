@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingy", "Constra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingyTest", "ConstraintThingyTest\ConstraintThingyTest.csproj", "{80C3A15A-91E8-4A41-9979-2CDD3497AA28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingyGUI", "ConstraintThingyGUI\ConstraintThingyGUI.csproj", "{3B221AD8-592F-4DF3-871C-23968E7C6DC8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConstraintThingyPerformanceTesting", "ConstraintThingyPerformanceTesting\ConstraintThingyPerformanceTesting.csproj", "{6B4ECFF8-3CF9-424A-9A58-596A61E5925C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpUtils", "lib\csharp-utils\CSharpUtils\CSharpUtils.csproj", "{B32A52BB-656F-4985-9CB6-9DC3F995BD21}"
@@ -46,16 +44,6 @@ Global
 		{80C3A15A-91E8-4A41-9979-2CDD3497AA28}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{80C3A15A-91E8-4A41-9979-2CDD3497AA28}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{80C3A15A-91E8-4A41-9979-2CDD3497AA28}.Release|x86.ActiveCfg = Release|Any CPU
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Debug|x86.ActiveCfg = Debug|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Debug|x86.Build.0 = Debug|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Release|Any CPU.ActiveCfg = Release|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Release|Mixed Platforms.Build.0 = Release|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Release|x86.ActiveCfg = Release|x86
-		{3B221AD8-592F-4DF3-871C-23968E7C6DC8}.Release|x86.Build.0 = Release|x86
 		{6B4ECFF8-3CF9-424A-9A58-596A61E5925C}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{6B4ECFF8-3CF9-424A-9A58-596A61E5925C}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{6B4ECFF8-3CF9-424A-9A58-596A61E5925C}.Debug|Mixed Platforms.Build.0 = Debug|x86

@@ -61,6 +61,9 @@ namespace ConstraintThingy
         /// </summary>
         public MultiInterval(Interval interval)
         {
+            Debug.Assert(!double.IsNaN(interval.LowerBound));
+            Debug.Assert(!double.IsNaN(interval.UpperBound));
+
             _intervals.Add(interval);
         }
 
@@ -100,6 +103,8 @@ namespace ConstraintThingy
 
         private void Add(Interval interval)
         {
+            Debug.Assert(!double.IsNaN(interval.LowerBound));
+            Debug.Assert(!double.IsNaN(interval.UpperBound));
             Debug.Assert(!interval.IsEmpty);
 
             for (int i = 0; i < _intervals.Count; i++)
@@ -285,6 +290,66 @@ namespace ConstraintThingy
                         multiInterval.Add(Interval.Divide(aIntervals[i], intervalDivisor));
                     }
                 }
+            }
+
+            return multiInterval;
+        }
+
+        /// <summary>
+        /// Computes the maximum of two multi-intervals
+        /// </summary>
+        public static MultiInterval Max(MultiInterval a, MultiInterval b)
+        {
+            List<Interval> aIntervals = a._intervals;
+            List<Interval> bIntervals = b._intervals;
+
+            MultiInterval multiInterval = new MultiInterval();
+
+            for (int i = 0; i < aIntervals.Count; i++)
+            {
+                for (int j = 0; j < bIntervals.Count; j++)
+                {
+                    Interval max = Interval.Max(aIntervals[i], bIntervals[j]);
+                    multiInterval.Add(max);
+                }
+            }
+
+            return multiInterval;
+        }
+
+        /// <summary>
+        /// Computes the maximum of two multi-intervals
+        /// </summary>
+        public static MultiInterval Min(MultiInterval a, MultiInterval b)
+        {
+            List<Interval> aIntervals = a._intervals;
+            List<Interval> bIntervals = b._intervals;
+
+            MultiInterval multiInterval = new MultiInterval();
+
+            for (int i = 0; i < aIntervals.Count; i++)
+            {
+                for (int j = 0; j < bIntervals.Count; j++)
+                {
+                    Interval min = Interval.Min(aIntervals[i], bIntervals[j]);
+                    multiInterval.Add(min);
+                }
+            }
+
+            return multiInterval;
+        }
+
+        /// <summary>
+        /// Extends the multi-interval to contain the specified value.
+        /// </summary>
+        public MultiInterval Extend(double value)
+        {
+            MultiInterval multiInterval = new MultiInterval();
+
+            for (int i = 0; i < _intervals.Count; i++)
+            {
+                Interval extended = _intervals[i].Extend(value);
+                multiInterval.Add(extended);
             }
 
             return multiInterval;

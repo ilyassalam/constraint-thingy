@@ -35,8 +35,11 @@ namespace ConstraintThingyPerformanceTesting
         {
             while (true)
             {
-                if (!SolveInitial()) 
+                var solution = SolveInitial();
+                if (solution == null) 
                     return false;
+
+                Console.WriteLine(solution);
             }
         }
 
@@ -44,17 +47,16 @@ namespace ConstraintThingyPerformanceTesting
         /// Solves for the first solution, returning true if one was found.
         /// </summary>
         /// <returns></returns>
-        public bool SolveInitial()
+        public Solution SolveInitial()
         {
             ConstraintThingySolver solver = new ConstraintThingySolver();
             InitializeConstraintSystem(solver);
 
             foreach (var solution in solver.Solutions)
             {
-                Console.WriteLine(solution);
-                return true;
+                return solution;
             }
-            return false;
+            return null;
         }
     }
 }

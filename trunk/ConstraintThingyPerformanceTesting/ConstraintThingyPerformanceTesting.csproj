@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnActualLevel.cs" />
     <Compile Include="DistanceSquared.cs" />
     <Compile Include="EightQueens.cs" />
     <Compile Include="EightQueensIntegers.cs" />

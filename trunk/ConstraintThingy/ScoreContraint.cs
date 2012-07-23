@@ -48,6 +48,7 @@ namespace ConstraintThingy
          * This version splits up the finite domain into several intervals and tries them all, while the other merges them into a single one.
          */
 
+        /*
         private MultiInterval ScoreFiniteDomainVariable()
         {
             Debug.Assert(!FiniteDomainVariable.IsEmpty);
@@ -64,9 +65,9 @@ namespace ConstraintThingy
             }
 
             return new MultiInterval(intervals);
-        }
+        }*/
 
-        /*
+        
         private Interval ScoreFiniteDomainVariable()
         {
             Debug.Assert(!FiniteDomainVariable.IsEmpty);
@@ -83,7 +84,7 @@ namespace ConstraintThingy
             }
 
             return result;
-        }*/
+        }
 
         protected internal override void UpdateVariable(Variable variable, out bool success)
         {

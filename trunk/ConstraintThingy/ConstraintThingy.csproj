@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\SolutionSet.cs" />
+    <Compile Include="Intervals\Reals\Constraints\RealMinConstraint.cs" />
+    <Compile Include="Intervals\Reals\Constraints\RealMaxConstraint.cs" />
     <Compile Include="Intervals\Reals\MultiInterval.cs" />
     <Compile Include="ScoreContraint.cs" />
     <Compile Include="ScoreMapping.cs" />
@@ -63,14 +65,6 @@
     <Compile Include="Finite Domains\Constraints\EqualityConstraint.cs" />
     <Compile Include="Finite Domains\Constraints\InequalityConstraint.cs" />
     <Compile Include="Finite Domains\FiniteDomainVariable.cs" />
-    <Compile Include="Graph\AABBNode.cs" />
-    <Compile Include="Graph\CircleNode.cs" />
-    <Compile Include="Graph\Edge.cs" />
-    <Compile Include="Graph\Graph.cs" />
-    <Compile Include="Graph\Interfaces\IEdge.cs" />
-    <Compile Include="Graph\Interfaces\IGraph.cs" />
-    <Compile Include="Graph\Interfaces\INode.cs" />
-    <Compile Include="Graph\Node.cs" />
     <Compile Include="Intervals\Integers\Constraints\IntegerSumConstraint.cs" />
     <Compile Include="Intervals\Integers\Constraints\IntegerDifferenceConstraint.cs" />
     <Compile Include="Intervals\Integers\Constraints\IntegerInequalityConstraint.cs" />

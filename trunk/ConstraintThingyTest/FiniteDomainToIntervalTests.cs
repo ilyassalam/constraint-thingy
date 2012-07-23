@@ -119,7 +119,7 @@ namespace ConstraintThingyTest
 
             for (int i = 0; i < numRooms; i++)
             {
-                roomScores[i] = solver.CreateEnumeratedReal(roomTypes[i], scoreMapping);
+                roomScores[i] = Constraint.ScoreVariable(roomTypes[i], scoreMapping);
             }
 
             var sum = Constraint.Add(roomScores);
@@ -154,7 +154,7 @@ namespace ConstraintThingyTest
 
             for (int i = 0; i < numRooms; i++)
             {
-                roomScores[i] = solver.CreateEnumeratedReal(roomTypes[i], scoreMapping);
+                roomScores[i] = Constraint.ScoreVariable(roomTypes[i], scoreMapping);
             }
 
             var sum = Constraint.Add(roomScores);
@@ -201,7 +201,7 @@ namespace ConstraintThingyTest
 
             for (int i = 0; i < numRooms; i++)
             {
-                roomScores[i] = solver.CreateEnumeratedReal(roomTypes[i], scoreMapping);
+                roomScores[i] = Constraint.ScoreVariable(roomTypes[i], scoreMapping);
             }
 
             var sum = roomScores.Aggregate((a,b) =>
@@ -366,7 +366,7 @@ namespace ConstraintThingyTest
 
             for (int i = 0; i < numRooms; i++)
             {
-                roomScores[i] = solver.CreateEnumeratedReal(roomTypes[i], scoreMapping);
+                roomScores[i] = Constraint.ScoreVariable(roomTypes[i], scoreMapping);
             }
 
             var sum = roomScores.Aggregate((a, b) =>
@@ -418,7 +418,7 @@ namespace ConstraintThingyTest
 
             for (int i = 0; i < numRooms; i++)
             {
-                roomScores[i] = solver.CreateEnumeratedReal(roomTypes[i], scoreMapping);
+                roomScores[i] = Constraint.ScoreVariable(roomTypes[i], scoreMapping);
             }
 
             var sum = Constraint.Add(roomScores);

@@ -60,47 +60,60 @@ namespace ConstraintThingy
         /// </summary>
         public void Split(double spot, out Interval upper, out Interval lower)
         {
+            // special case of width = 2
+            if (spot == UpperBound || spot == LowerBound)
+            {
+                Debug.Assert(Range <= .01f);
+                upper = new Interval(UpperBound, UpperBound);
+                lower = new Interval(LowerBound, LowerBound);
+
+                return;
+            }
+
             Debug.Assert(UpperBound > LowerBound);
 
             long center;
             long upperBound;
             long lowerBound;
+
             unsafe
             {
-                center = *((long*)&spot);
+                center = *((long*)(double*)(&spot));
+
                 fixed (double * ptr = &UpperBound)
                 {
-                    upperBound = *((long*) ptr);
+                    upperBound = *((long*)(double*) ptr);
                 }
 
                 fixed (double* ptr = &LowerBound)
                 {
-                    lowerBound = *((long*) ptr);
+                    lowerBound = *((long*)(double*) ptr);
                 }
             }
 
             Debug.Assert(spot >= LowerBound && spot <= UpperBound);
 
-            // special case of width = 2
-            if (center == upperBound || center == lowerBound)
-            {
-                upper = new Interval(UpperBound, UpperBound);
-                lower = new Interval(LowerBound, LowerBound);
-            }
-            else
-            {
-                long lowerUpperBound = (center >= 0 ? center + 1 : center - 1);
 
-                unsafe
-                {
-                    lower = new Interval(
-                        *((double*)&lowerBound),
-                        *((double*)&center));
-                    upper = new Interval(
-                        *((double*)&lowerUpperBound),
-                        *((double*)&upperBound));   
-                }
+            long lowerUpperBound = (center >= 0 ? center - 1 : center + 1);
+
+            unsafe
+            {
+                double lowerUpperBoundD = *((double*)&lowerUpperBound);
+                if (double.IsNaN(lowerUpperBoundD)) 
+                    lowerUpperBoundD = BitConverter.Int64BitsToDouble(-9223372036854775807);
+                    
+                lower = new Interval(
+                    *((double*)&lowerBound),
+                    lowerUpperBoundD);
+                upper = new Interval(
+                    *((double*)&center),
+                    *((double*)&upperBound));
             }
+
+            Debug.Assert(!double.IsNaN(lower.LowerBound));
+            Debug.Assert(!double.IsNaN(lower.UpperBound));
+            Debug.Assert(!double.IsNaN(upper.LowerBound));
+            Debug.Assert(!double.IsNaN(upper.UpperBound));
 
             Debug.Assert(!Intersects(upper, lower));
         }
@@ -124,12 +137,16 @@ namespace ConstraintThingy
         /// <summary>
         /// Extends the interval to include a new value.
         /// </summary>
-        public void Extend(double value)
+        public Interval Extend(double value)
         {
+            Interval result = new Interval(LowerBound, UpperBound);
+            
             if (value < LowerBound)
-                LowerBound = value;
+                result.LowerBound = value;
             else if (value > UpperBound)
-                UpperBound = value;
+                result.UpperBound = value;
+
+            return result;
         }
 
         /// <summary>
@@ -144,17 +161,7 @@ namespace ConstraintThingy
         {
             get
             {
-                // the bit representation of double.NaN
-                const long NaN = -2251799813685248;
-
-                // this is much much faster than calling double.NaN
-                unsafe
-                {
-                    fixed (double* lol = &UpperBound)
-                    {
-                        return *((long*)lol) == NaN;
-                    }
-                }
+                return double.IsNaN(UpperBound) || double.IsNaN(LowerBound);
             }
         }
 

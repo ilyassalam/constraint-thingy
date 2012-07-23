@@ -1118,5 +1118,159 @@ namespace ConstraintThingyTest
                 AssertIntersect(y.UniqueValue, m.UniqueValue * x.UniqueValue + b.UniqueValue);
             }
         }
+
+        [TestMethod]
+        public void MaxConstraint()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10);
+
+            var y = solver.CreateRealVariable(20);
+
+            var z = solver.CreateRealVariable();
+            
+            Constraint.Max(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(1))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Max(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MaxConstraint2()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10, 30);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Max(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(1))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Max(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MaxConstraint3()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10, 5000);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Max(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(10))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Max(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MaxConstraint4()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(-500, 0);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Max(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(10))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Max(x.UniqueValue, y.UniqueValue));
+                AssertIntersect(z.UniqueValue, y.UniqueValue);
+            }
+        }
+
+        [TestMethod]
+        public void MinConstraint()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10);
+
+            var y = solver.CreateRealVariable(20);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Min(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(1))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Min(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MinConstraint2()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10, 30);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Min(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(1))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Min(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MinConstraint3()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(10, 5000);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Min(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(10))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Min(x.UniqueValue, y.UniqueValue));
+            }
+        }
+
+        [TestMethod]
+        public void MinConstraint4()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            var x = solver.CreateRealVariable(-500, 0);
+
+            var y = solver.CreateRealVariable(10, 30);
+
+            var z = solver.CreateRealVariable();
+
+            Constraint.Min(z, x, y);
+
+            foreach (var solution in solver.Solutions.FirstElements(10))
+            {
+                AssertIntersect(z.UniqueValue, Interval.Min(x.UniqueValue, y.UniqueValue));
+                AssertIntersect(z.UniqueValue, x.UniqueValue);
+            }
+        }
     }
 }

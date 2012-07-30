@@ -195,31 +195,6 @@ namespace ConstraintThingyTest
         }
 
         [TestMethod]
-        public void SumConstraint7()
-        {
-            ConstraintThingySolver solver = new ConstraintThingySolver();
-
-            RealVariable x = new RealVariable(solver, "x", new Interval(-20, -10));
-            RealVariable y = new RealVariable(solver, "y", new Interval(-10, 50));
-            RealVariable z = new RealVariable(solver, "z", new Interval(-100, 100));
-
-            RealVariable w = new RealVariable(solver, "w", new Interval(200, 1000));
-
-            RealVariable sum = x + y;
-
-            RealVariable sum2 = sum + z;
-
-            RealVariable sum3 = x + y + z + w + sum2 + sum;
-
-            foreach (var solution in solver.Solutions.FirstElements(10))
-            {
-                AssertIntersect(sum.UniqueValue, x.UniqueValue + y.UniqueValue);
-                AssertIntersect(sum2.UniqueValue, sum.UniqueValue + z.UniqueValue);
-                AssertIntersect(sum3.UniqueValue, x.UniqueValue + y.UniqueValue + z.UniqueValue + w.UniqueValue + sum2.UniqueValue + sum.UniqueValue);
-            }
-        }
-
-        [TestMethod]
         public void ProductConstraint()
         {
             ConstraintThingySolver solver = new ConstraintThingySolver();

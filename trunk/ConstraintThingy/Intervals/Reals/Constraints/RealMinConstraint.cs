@@ -1,26 +1,24 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ConstraintThingy
 {
     /// <summary>
-    /// Contains one variable to be the minimum of two others
+    /// Contains one variable to be the minimum of the others
     /// </summary>
     class RealMinConstraint : Constraint<RealVariable>
     {
         /// <summary>
         /// Creates a new interval min constraint
         /// </summary>
-        public RealMinConstraint(RealVariable min, RealVariable x, RealVariable y)
-            : base(new[] { min, x, y })
+        public RealMinConstraint(RealVariable min, params RealVariable[] variables)
+            : base(new[] { min }.Concat(variables).ToArray())
         {
+            Debug.Assert(variables.Length >= 2);
         }
 
         private new RealVariable Min { get { return Variables[0]; } }
-
-        private RealVariable X { get { return Variables[1]; } }
-
-        private RealVariable Y { get { return Variables[2]; } }
 
         protected internal override void UpdateVariable(RealVariable variable, out bool success)
         {
@@ -28,21 +26,16 @@ namespace ConstraintThingy
 
             if (variable == Min)
             {
-                result = MultiInterval.Min(X.AllowableValues.First, Y.AllowableValues.First);
-            }
-            else if (variable == X)
-            {
-                // we can't be less than the 'min', so we bound ourselves to the range    (min, +infinity]
-                result = Min.AllowableValues.First.Extend(double.PositiveInfinity);
-            }
-            else if (variable == Y)
-            {
-                // we can't be less than the 'min', so we bound ourselves to the range    (min, +infinity]
-                result = Min.AllowableValues.First.Extend(double.PositiveInfinity);
+                result = Variables[1].AllowableValues.First;
+                for (int i = 2; i < Variables.Length; i++)
+                {
+                    result = MultiInterval.Min(result, Variables[i].AllowableValues.First);
+                }
             }
             else
             {
-                throw new InvalidOperationException("Should not be able to reach this point.");
+                // we can't be less than the 'min', so we bound ourselves to the range    (min, +infinity]
+                result = Min.AllowableValues.First.Extend(double.PositiveInfinity);
             }
 
             variable.NarrowTo(result, out success);

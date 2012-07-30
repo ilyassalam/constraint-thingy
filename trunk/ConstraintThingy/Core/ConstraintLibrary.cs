@@ -24,20 +24,11 @@ namespace ConstraintThingy
         /// </summary>
         public static IntegerVariable Add(IntegerVariable a, IntegerVariable b)
         {
-            IntegerVariable sum;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Add, a, b, out sum))
-            {
-                return sum;
-            }
-
-            sum = new IntegerVariable(a.ConstraintThingySolver, null, IntegerVariable.DefaultRange);
+            IntegerVariable sum = new IntegerVariable(a.ConstraintThingySolver, null, IntegerVariable.DefaultRange);
 
             Constraint.InRange(sum, a.AllowableValues + b.AllowableValues);
 
             Sum(sum, a, b);
-
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Add, a, b, sum);
 
             return sum;
         }
@@ -79,20 +70,11 @@ namespace ConstraintThingy
         /// </summary>
         public static IntegerVariable Subtract(IntegerVariable a, IntegerVariable b)
         {
-            IntegerVariable difference;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Subtract, a, b, out difference))
-            {
-                return difference;
-            }
-
-            difference = new IntegerVariable(a.ConstraintThingySolver, null, IntegerVariable.DefaultRange);
+            IntegerVariable difference = new IntegerVariable(a.ConstraintThingySolver, null, IntegerVariable.DefaultRange);
 
             Constraint.InRange(difference, a.AllowableValues - b.AllowableValues);
             
             Difference(difference, a, b);
-
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Subtract, a, b, difference);
 
             return difference;
         }
@@ -201,21 +183,27 @@ namespace ConstraintThingy
         /// </summary>
         public static RealVariable Maximize(RealVariable a, RealVariable b)
         {
-            RealVariable max;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Maximize, a, b, out max))
-            {
-                return max;
-            }
-
-            max = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+            RealVariable max = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             // calculate the possible range for the sum so we improve the speed of the search
             Constraint.InRange(max, MultiInterval.Max(a.AllowableValues.First, b.AllowableValues.First));
 
             Max(max, a, b);
 
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Maximize, a, b, max);
+            return max;
+        }
+
+        /// <summary>
+        /// Creates and returns a real variable which represents the maximum of the specified variables
+        /// </summary>
+        public static RealVariable Maximize(params RealVariable[] variables)
+        {
+            RealVariable max = new RealVariable(variables[0].ConstraintThingySolver, null, RealVariable.DefaultRange);
+
+            // calculate the possible range for the sum so we improve the speed of the search
+            Constraint.InRange(max, variables.Select(var => var.AllowableValues.First).Aggregate(MultiInterval.Max));
+
+            Max(max, variables);
 
             return max;
         }
@@ -225,21 +213,27 @@ namespace ConstraintThingy
         /// </summary>
         public static RealVariable Minimize(RealVariable a, RealVariable b)
         {
-            RealVariable min;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Minimize, a, b, out min))
-            {
-                return min;
-            }
-
-            min = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+            RealVariable min = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             // calculate the possible range for the sum so we improve the speed of the search
             Constraint.InRange(min, MultiInterval.Min(a.AllowableValues.First, b.AllowableValues.First));
 
             Min(min, a, b);
 
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Minimize, a, b, min);
+            return min;
+        }
+
+        /// <summary>
+        /// Creates and returns a real variable which represents the minimum of <paramref name="a"/> and <paramref name="b"/>
+        /// </summary>
+        public static RealVariable Minimize(params RealVariable[] variables)
+        {
+            RealVariable min = new RealVariable(variables[0].ConstraintThingySolver, null, RealVariable.DefaultRange);
+
+            // calculate the possible range for the sum so we improve the speed of the search
+            Constraint.InRange(min, variables.Select(var => var.AllowableValues.First).Aggregate(MultiInterval.Min));
+
+            Min(min, variables);
 
             return min;
         }
@@ -253,11 +247,27 @@ namespace ConstraintThingy
         }
 
         /// <summary>
+        /// Constrains <paramref name="max"/> to be the maximum of the specified variables
+        /// </summary>
+        public static void Max(RealVariable max, params RealVariable[] variables)
+        {
+            new RealMaxConstraint(max, variables);
+        }
+
+        /// <summary>
         /// Constrains <paramref name="min"/> to be the minimum of <paramref name="a"/> and <paramref name="b"/>
         /// </summary>
         public static void Min(RealVariable min, RealVariable a, RealVariable b)
         {
             new RealMinConstraint(min, a, b);
+        }
+
+        /// <summary>
+        /// Constrains <paramref name="min"/> to be the minimum of the specified variables
+        /// </summary>
+        public static void Min(RealVariable min, params RealVariable[] variables)
+        {
+            new RealMinConstraint(min, variables);
         }
 
         /// <summary>
@@ -273,21 +283,12 @@ namespace ConstraintThingy
         /// </summary>
         public static RealVariable Add(RealVariable a, RealVariable b)
         {
-            RealVariable sum;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Add, a, b, out sum))
-            {
-                return sum;
-            }
-
-            sum = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+            RealVariable sum = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             // calculate the possible range for the sum so we improve the speed of the search
             Constraint.InRange(sum, a.AllowableValues.First + b.AllowableValues.First);
 
             Sum(sum, a, b);
-            
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Add, a, b, sum);
 
             return sum;
         }
@@ -323,18 +324,11 @@ namespace ConstraintThingy
         {
             RealVariable product;
 
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Add, a, b, out product))
-            {
-                return product;
-            }
-
             product = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             Constraint.InRange(product, a.AllowableValues.First * b.AllowableValues.First);
 
             Product(product, a, b);
-
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Multiply, a, b, product);
 
             return product;
         }
@@ -382,18 +376,11 @@ namespace ConstraintThingy
         {
             RealVariable quotient;
 
-            if (dividend.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Divide, dividend, divisor, out quotient))
-            {
-                return quotient;
-            }
-
             quotient = new RealVariable(dividend.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             Constraint.InRange(quotient, dividend.AllowableValues.First / divisor.AllowableValues.First);
 
             Quotient(quotient, dividend, divisor);
-
-            dividend.ConstraintThingySolver.SubexpressionEliminator.Store(Divide, dividend, divisor, quotient);
 
             return quotient;
         }
@@ -411,20 +398,11 @@ namespace ConstraintThingy
         /// </summary>
         public static RealVariable Subtract(RealVariable a, RealVariable b)
         {
-            RealVariable difference;
-
-            if (a.ConstraintThingySolver.SubexpressionEliminator.TryGetValue(Subtract, a, b, out difference))
-            {
-                return difference;
-            }
-
-            difference = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
+            RealVariable difference = new RealVariable(a.ConstraintThingySolver, null, RealVariable.DefaultRange);
 
             Constraint.InRange(difference, a.AllowableValues.First - b.AllowableValues.First);
             
             Difference(difference, a, b);
-
-            a.ConstraintThingySolver.SubexpressionEliminator.Store(Subtract, a, b, difference);
 
             return difference;
         }

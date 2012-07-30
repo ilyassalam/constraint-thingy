@@ -79,8 +79,6 @@
     <Compile Include="Intervals\Integers\IntegerInterval.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Solution.cs" />
-    <Compile Include="Subexpression Elimination\Subexpression.cs" />
-    <Compile Include="Subexpression Elimination\SubexpressionEliminator.cs" />
     <Compile Include="Core\Variable.cs" />
     <Compile Include="Structs\Vector2.cs" />
   </ItemGroup>

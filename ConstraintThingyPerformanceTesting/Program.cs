@@ -19,27 +19,19 @@ namespace ConstraintThingyPerformanceTesting
 
         static void Main(string[] args)
         {
-            List<TimeSpan> solveTimes = new List<TimeSpan>();
-
             // solve it a couple times to try and JIT everything
-            for (int i = 0; i < 10; i++) new AnActualLevel().SolveInitial();
+            for (int i = 0; i < 5; i++) new AnActualLevelBig().SolveInitial();
 
-            for (int i = 0; i < 1000; i++)
+            int numSolutions = 0;
+            while(true)
             {
-                Solution solution = new AnActualLevel().SolveInitial();
-                solveTimes.Add(solution.SolveTime);
+                Solution solution = new AnActualLevelBig().SolveInitial();
+
+                File.AppendAllText("data", solution.SolveTime.TotalMilliseconds + "\n");
+
+                numSolutions++;
+                Console.WriteLine(numSolutions);
             }
-
-            StringBuilder data = new StringBuilder();
-
-            foreach (var solveTime in solveTimes)
-            {
-                data.AppendLine(solveTime.TotalMilliseconds.ToString());
-            }
-            
-            File.WriteAllText("data", data.ToString());
-
-            Console.ReadLine();
         }
     }
 }

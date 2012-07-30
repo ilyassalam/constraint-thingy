@@ -416,11 +416,5 @@ namespace ConstraintThingy
                 }
             }
         }
-
-        #region Subexpression Elimination
-
-        internal readonly SubexpressionEliminator SubexpressionEliminator = new SubexpressionEliminator();
-
-        #endregion
     }
 }

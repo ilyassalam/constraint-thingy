@@ -115,7 +115,11 @@ namespace ConstraintThingy
 
             CurrentFramePointer = framePointer;
 
-            _workList.Clear();
+            while (_workList.Count > 0)
+            {
+                var arc = _workList.Dequeue();
+                arc.QueuedForUpdate = false;
+            }
         }
 
         private readonly List<Constraint> _constraints = new List<Constraint>();
@@ -361,7 +365,9 @@ namespace ConstraintThingy
                 _startedSolving = true;
 
                 // shuffle only if the random option has been set
-                Variable[] variables = ExpansionOrder == ExpansionOrder.Random ? (_variables.Where(var => var.RequireUnique).ToShuffled(Random)) : _variables.ToArray();
+                var eligibleVariables = _variables.Where(var => var.RequireUnique);
+
+                Variable[] variables = ExpansionOrder == ExpansionOrder.Random ? (eligibleVariables.ToShuffled(Random)) : eligibleVariables.ToArray();
 
                 // higher priorities first
                 Array.Sort(variables, (a, b) => -a.Priority.CompareTo(b.Priority));

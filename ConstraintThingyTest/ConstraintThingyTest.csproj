@@ -45,7 +45,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnActualLevel.cs" />
+    <Compile Include="LevelTests.cs" />
     <Compile Include="FiniteDomainToIntervalTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FiniteDomainVariableTests.cs" />

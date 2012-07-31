@@ -20,14 +20,14 @@ namespace ConstraintThingyPerformanceTesting
         static void Main(string[] args)
         {
             // solve it a couple times to try and JIT everything
-            for (int i = 0; i < 5; i++) new AnActualLevelBig().SolveInitial();
+            for (int i = 0; i < 3; i++) new AnActualLevelBig().SolveInitial();
 
             int numSolutions = 0;
             while(true)
             {
                 Solution solution = new AnActualLevelBig().SolveInitial();
 
-                File.AppendAllText("data", solution.SolveTime.TotalMilliseconds + "\n");
+                File.AppendAllText("data.txt", solution.SolveTime.TotalMilliseconds + "\n");
 
                 numSolutions++;
                 Console.WriteLine(numSolutions);

@@ -17,6 +17,8 @@ namespace ConstraintThingy
 
         internal bool QueuedForUpdate = false;
 
+        internal abstract Constraint Constraint { get; }
+
         internal void MarkForUpdate()
         {
             if (!QueuedForUpdate)
@@ -44,6 +46,11 @@ namespace ConstraintThingy
         internal override void Update(out bool success)
         {
             _constraint.UpdateVariable(Variable, out success);
+        }
+
+        internal override Constraint Constraint
+        {
+            get { return _constraint; }
         }
 
         public override string ToString()

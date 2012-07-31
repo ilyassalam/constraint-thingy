@@ -113,8 +113,35 @@ namespace ConstraintThingy
         {
             get
             {
+                int mark = ConstraintThingySolver.SaveValues();
+
                 if (IsUnique)
+                {
+                    bool success;
+
+                    // first try to narrow constraints
+                    NarrowConstraints(out success);
+
+                    // if failure, we're done
+                    if (!success)
+                    {
+                        ConstraintThingySolver.Restore(mark);
+                        yield break;
+                    }
+
+                    // then try to resolve constraints
+                    ConstraintThingySolver.ResolveConstraints(out success);
+
+                    if (!success)
+                    {
+                        ConstraintThingySolver.Restore(mark);
+                        yield break;
+                    }
+                    
                     yield return AllowableValues;
+
+                    ConstraintThingySolver.Restore(mark);
+                }
                 else
                 {
                     // shuffle the set of indices in the finite domain
@@ -129,8 +156,6 @@ namespace ConstraintThingy
                     // if the options are set, we iterate over them in a random order
                     if (ConstraintThingySolver.ExpansionOrder == ExpansionOrder.Random)
                         elementindices.Shuffle(ConstraintThingySolver.Random);
-
-                    int mark = ConstraintThingySolver.SaveValues();
 
                     foreach (var index in elementindices)
                     {

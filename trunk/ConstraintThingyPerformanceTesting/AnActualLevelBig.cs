@@ -1,3 +1,4 @@
+using System;
 using CSharpUtils;
 using ConstraintThingy;
 
@@ -7,9 +8,14 @@ namespace ConstraintThingyPerformanceTesting
     {
         protected override void InitializeConstraintSystem(ConstraintThingySolver solver)
         {
-            FiniteDomain<string> roomType = new FiniteDomain<string>("start", "empty", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door", "end");
+            // topology: https://docs.google.com/a/u.northwestern.edu/drawings/d/1mpZ2gPq7D8mab7PI2PtV4bKYCrrtb7ZS3hg5gwgMa_E/
+            //
 
-            FiniteDomainVariable<string>[] roomTypes = new FiniteDomainVariable<string>[41];
+            // declare all of the room types
+
+            FiniteDomain<String> roomType = new FiniteDomain<string>("start", "empty", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door", "end");
+
+            FiniteDomainVariable<String>[] roomTypes = new FiniteDomainVariable<string>[41];
             roomTypes[0] = solver.CreateFiniteDomainVariable(roomType, "start");
 
             for (int i = 1; i <= 13; i++)
@@ -105,18 +111,18 @@ namespace ConstraintThingyPerformanceTesting
             Constraint.NotEqual(roomTypes[31], roomTypes[32]);
             Constraint.NotEqual(roomTypes[32], roomTypes[13]);
 
-            ScoreMapping<string> damages = new ScoreMapping<string>(roomType,
-                                                                    "small-health-pack".PairedWith(new Interval(10)),
-                                                                    "big-health-pack".PairedWith(new Interval(20)),
-                                                                    "start".PairedWith(new Interval(0)),
-                                                                    "empty".PairedWith(new Interval(0)),
-                                                                    "zombie".PairedWith(new Interval(-10)),
-                                                                    "two zombies".PairedWith(new Interval(-25)),
-                                                                    "dog".PairedWith(new Interval(-13)),
-                                                                    "trap".PairedWith(new Interval(-10)),
-                                                                    "boss".PairedWith(new Interval(-30)),
-                                                                    "locked-door".PairedWith(new Interval(0)),
-                                                                    "end".PairedWith(new Interval(0)));
+            ScoreMapping<String> damages = new ScoreMapping<String>(roomType,
+                "small-health-pack".PairedWith(new Interval(15)),
+                "big-health-pack".PairedWith(new Interval(30)),
+                "start".PairedWith(new Interval(0)),
+                "empty".PairedWith(new Interval(0)),
+                "zombie".PairedWith(new Interval(-10)),
+                "two zombies".PairedWith(new Interval(-25)),
+                "dog".PairedWith(new Interval(-13)),
+                "trap".PairedWith(new Interval(-10)),
+                "boss".PairedWith(new Interval(-30)),
+                "locked-door".PairedWith(new Interval(0)),
+                "end".PairedWith(new Interval(0)));
 
             // create variables to contain how much damage is dealt in each room
 
@@ -210,18 +216,18 @@ namespace ConstraintThingyPerformanceTesting
             Constraint.Sum(playerHealth[40], roomDelta[40], Constraint.Minimize(playerHealth[33], playerHealth[36], playerHealth[37]).With(r => r.RequireUnique = false));
 
 
-            ScoreMapping<string> keyLockScoring = new ScoreMapping<string>(roomType,
-                                                                           "small-health-pack".PairedWith(new Interval(0)),
-                                                                           "big-health-pack".PairedWith(new Interval(0)),
-                                                                           "start".PairedWith(new Interval(0)),
-                                                                           "empty".PairedWith(new Interval(0)),
-                                                                           "zombie".PairedWith(new Interval(0)),
-                                                                           "two zombies".PairedWith(new Interval(0)),
-                                                                           "dog".PairedWith(new Interval(0)),
-                                                                           "trap".PairedWith(new Interval(0)),
-                                                                           "boss".PairedWith(new Interval(2)),
-                                                                           "locked-door".PairedWith(new Interval(-1)),
-                                                                           "end".PairedWith(new Interval(0)));
+            ScoreMapping<String> keyLockScoring = new ScoreMapping<String>(roomType,
+                    "small-health-pack".PairedWith(new Interval(0)),
+                    "big-health-pack".PairedWith(new Interval(0)),
+                    "start".PairedWith(new Interval(0)),
+                    "empty".PairedWith(new Interval(0)),
+                    "zombie".PairedWith(new Interval(0)),
+                    "two zombies".PairedWith(new Interval(0)),
+                    "dog".PairedWith(new Interval(0)),
+                    "trap".PairedWith(new Interval(0)),
+                    "boss".PairedWith(new Interval(2)),
+                    "locked-door".PairedWith(new Interval(-1)),
+                    "end".PairedWith(new Interval(0)));
 
             // 3 things need to happen for a key and lock puzzle.
             //          1) player needs to first encounter the boss
@@ -244,28 +250,25 @@ namespace ConstraintThingyPerformanceTesting
             for (int i = 1; i <= 40; i++)
             {
                 lockKeyDelta[i] = Constraint.ScoreVariable(roomTypes[i], keyLockScoring);
-                lockKeyDelta[i].RequireUnique = true;
-                lockKeyDelta[i].Precision = .2;
-                lockKeyDelta[i].Priority = 2;
+                lockKeyDelta[i].RequireUnique = false;
             }
 
             RealVariable[] lockKeyRunningSum = new RealVariable[41];
 
             // start at 0
             lockKeyRunningSum[0] = solver.CreateRealVariable(0);
-            lockKeyRunningSum[0].RequireUnique = true;
+            lockKeyRunningSum[0].RequireUnique = false;
 
             // require the running sum to stay positive
             for (int i = 1; i <= 40; i++)
             {
-                lockKeyRunningSum[i] = solver.CreateRealVariable(0, 2.5);
+                lockKeyRunningSum[i] = solver.CreateRealVariable(0, 2);
                 lockKeyRunningSum[i].RequireUnique = false;
             }
 
 
             // require that the sum at the end be basically equal to 1
             Constraint.InRange(lockKeyRunningSum[14], .9, 1.1);
-
 
             Constraint.Sum(lockKeyRunningSum[1], lockKeyDelta[1], lockKeyRunningSum[0]);
             Constraint.Sum(lockKeyRunningSum[2], lockKeyDelta[2], lockKeyRunningSum[1]);
@@ -339,7 +342,7 @@ namespace ConstraintThingyPerformanceTesting
             Constraint.Equal(lockKeyRunningSum[33], lockKeyRunningSum[34]);
             Constraint.Sum(lockKeyRunningSum[35], lockKeyDelta[35], lockKeyRunningSum[33]);
 
-            Constraint.Minimize(lockKeyRunningSum[8], lockKeyRunningSum[33]);
+            Constraint.Equal(lockKeyRunningSum[8], lockKeyRunningSum[33]);
             Constraint.Sum(lockKeyRunningSum[36], lockKeyDelta[36], lockKeyRunningSum[8]);
             Constraint.Sum(lockKeyRunningSum[37], lockKeyDelta[37], lockKeyRunningSum[36]);
             Constraint.Sum(lockKeyRunningSum[38], lockKeyDelta[38], lockKeyRunningSum[37]);
@@ -350,16 +353,13 @@ namespace ConstraintThingyPerformanceTesting
             Constraint.Equal(lockKeyRunningSum[33], lockKeyRunningSum[36], lockKeyRunningSum[37]);
             Constraint.Sum(lockKeyRunningSum[40], lockKeyDelta[40], lockKeyRunningSum[33]);
 
-
-
-            Constraint.LimitOccurences("trap", 2, 4, roomTypes);
-            Constraint.MaximumOccurences("small-health-pack", 10, roomTypes);
-            Constraint.MaximumOccurences("big-health-pack", 6, roomTypes);
-            Constraint.MaximumOccurences("empty", 4, roomTypes);
+            //Constraint.LimitOccurences("trap", 2, 4, roomTypes);
+            //Constraint.MaximumOccurences("small-health-pack", 30, roomTypes);
+            //Constraint.MaximumOccurences("big-health-pack", 25, roomTypes);
+            //Constraint.MaximumOccurences("empty", 4, roomTypes);
 
             Constraint.RequireOccurences("boss", 1, roomTypes);
             Constraint.RequireOccurences("locked-door", 1, roomTypes);
-
         }
     }
 }

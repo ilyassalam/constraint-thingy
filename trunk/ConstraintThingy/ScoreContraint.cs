@@ -67,7 +67,6 @@ namespace ConstraintThingy
             return new MultiInterval(intervals);
         }*/
 
-        
         private Interval ScoreFiniteDomainVariable()
         {
             Debug.Assert(!FiniteDomainVariable.IsEmpty);

@@ -11,6 +11,107 @@ namespace ConstraintThingyTest
     public class FiniteDomainVariableTests
     {
         [TestMethod]
+        public void CorrectlyMapsBetweenValues()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            FiniteDomain<String> numbers = new FiniteDomain<string>("one", "two", "three");
+
+            FiniteDomain<String> colors = new FiniteDomain<string>("red", "green", "blue");
+
+            Mapping<String, String> mapping = new Mapping<string, string>(numbers, colors)
+                                                                {
+                                                                    { "one", "red" },
+                                                                    { "two", "green" },
+                                                                    { "three", "blue" }
+                                                                };
+
+            FiniteDomainVariable<String> numberVariable = solver.CreateFiniteDomainVariable(numbers, "one", "two", "three");
+
+            FiniteDomainVariable<String> colorVariable = solver.CreateFiniteDomainVariable(colors, "red", "green", "blue");
+
+            Constraint.Mapping(numberVariable, colorVariable, mapping);
+
+            int solutions = 0;
+
+            foreach (Solution solution in solver.Solutions)
+            {
+                solutions++;
+            }
+
+            Assert.AreEqual(3, solutions);
+        }
+
+        [TestMethod]
+        public void CorrectlyMapsBetweenValues2()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            FiniteDomain<String> numbers = new FiniteDomain<string>("one", "two", "three");
+
+            FiniteDomain<String> colors = new FiniteDomain<string>("red", "green", "blue");
+
+            Mapping<String, String> mapping = new Mapping<string, string>(numbers, colors)
+                                                                {
+                                                                    { "one", "red" },
+                                                                    { "two", "green" },
+                                                                    { "two", "blue" },
+                                                                    { "three", "blue" }
+                                                                };
+
+            FiniteDomainVariable<String> numberVariable = solver.CreateFiniteDomainVariable(numbers, "one", "two", "three");
+
+            FiniteDomainVariable<String> colorVariable = solver.CreateFiniteDomainVariable(colors, "red", "green", "blue");
+
+            Constraint.Mapping(numberVariable, colorVariable, mapping);
+
+            int solutions = 0;
+
+            foreach (Solution solution in solver.Solutions)
+            {
+                solutions++;
+            }
+
+            Assert.AreEqual(4, solutions);
+        }
+
+        [TestMethod]
+        public void CorrectlyMapsBetweenValues3()
+        {
+            ConstraintThingySolver solver = new ConstraintThingySolver();
+
+            FiniteDomain<String> numbers = new FiniteDomain<string>("one", "two", "three");
+
+            FiniteDomain<String> colors = new FiniteDomain<string>("red", "green", "blue");
+
+            Mapping<String, String> mapping = new Mapping<string, string>(numbers, colors)
+                                                                {
+                                                                    { "one", "red" },
+                                                                    { "one", "blue" },
+                                                                    { "two", "green" },
+                                                                    { "two", "blue" },
+                                                                    { "three", "blue" },
+                                                                    { "three", "red" }
+                                                                };
+
+            FiniteDomainVariable<String> numberVariable = solver.CreateFiniteDomainVariable(numbers, "one", "two", "three");
+
+            FiniteDomainVariable<String> colorVariable = solver.CreateFiniteDomainVariable(colors, "red", "green", "blue");
+
+            Constraint.Mapping(numberVariable, colorVariable, mapping);
+
+            int solutions = 0;
+
+            foreach (Solution solution in solver.Solutions)
+            {
+                solutions++;
+            }
+
+            Assert.AreEqual(6, solutions);
+        }
+
+
+        [TestMethod]
         public void CorrectlyEnumeratesPossibleValues()
         {
             ConstraintThingySolver constraintThingySolver = new ConstraintThingySolver();

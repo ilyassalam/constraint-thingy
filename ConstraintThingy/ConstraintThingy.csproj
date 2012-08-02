@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\SolutionSet.cs" />
+    <Compile Include="Finite Domains\Constraints\ColorTransformer.cs" />
     <Compile Include="Intervals\Reals\Constraints\RealMinConstraint.cs" />
     <Compile Include="Intervals\Reals\Constraints\RealMaxConstraint.cs" />
     <Compile Include="Intervals\Reals\MultiInterval.cs" />

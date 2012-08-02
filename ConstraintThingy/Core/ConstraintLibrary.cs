@@ -635,6 +635,11 @@ namespace ConstraintThingy
 
         #region Finite domains
 
+        public static void Mapping<T1, T2>(FiniteDomainVariable<T1> x, FiniteDomainVariable<T2> y, Mapping<T1, T2> mapping)
+        {
+            new MappingConstraint<T1, T2>(x, y, mapping);
+        }
+
         /// <summary>
         /// Limits the number of occurences of <paramref name="value"/> in <paramref name="variables"/> between <paramref name="minOccurences"/> and <paramref name="maxOccurences"/>
         /// </summary>

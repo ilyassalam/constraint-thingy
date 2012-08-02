@@ -635,6 +635,21 @@ namespace ConstraintThingy
 
         #region Finite domains
 
+        /// <summary>
+        /// Maps <paramref name="x"/> onto a new set via the specified <paramref name="mapping"/>
+        /// </summary>
+        public static FiniteDomainVariable<T2> Map<T1, T2>(FiniteDomainVariable<T1> x, Mapping<T1, T2> mapping)
+        {
+            FiniteDomainVariable<T2> newVariable = x.ConstraintThingySolver.CreateFiniteDomainVariable(mapping.End);
+
+            Mapping(x, newVariable, mapping);
+
+            return newVariable;
+        }
+
+        /// <summary>
+        /// Specifies a formal mapping between the values of variables <paramref name="x"/> and <paramref name="y"/> using the specified <paramref name="mapping"/>
+        /// </summary>
         public static void Mapping<T1, T2>(FiniteDomainVariable<T1> x, FiniteDomainVariable<T2> y, Mapping<T1, T2> mapping)
         {
             new MappingConstraint<T1, T2>(x, y, mapping);
@@ -774,7 +789,9 @@ namespace ConstraintThingy
         /// </summary>
         public static void NotEqual<T>(FiniteDomainVariable<T> variable, T value)
         {
-            variable.BackdoorSet(variable.AllowableValues.ClearBit(variable.FiniteDomain.IndexOf(value)));
+            UInt64 newValue = variable.AllowableValues.ClearBit(variable.FiniteDomain.IndexOf(value));
+
+            variable.BackdoorSet(newValue);
         }
 
 

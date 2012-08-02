@@ -66,6 +66,20 @@ namespace ConstraintThingy
                 return;
             }
 
+            else if (definite == MaxOccurences)
+            {
+                foreach (var variable in Variables)
+                {
+                    UInt64 value = variable.AllowableValues;
+                    if (value.BitCount() > 1)
+                    {
+                        variable.NarrowTo(~_set, out success);
+
+                        if (!success) return;
+                    }
+                }
+            }
+
             success = true;
             return;
         }

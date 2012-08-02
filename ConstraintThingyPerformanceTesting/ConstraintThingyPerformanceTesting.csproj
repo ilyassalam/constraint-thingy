@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnActualLevel.cs" />
-    <Compile Include="AnActualLevelBig.cs" />
+    <Compile Include="AnActualLevelBigHealth.cs" />
     <Compile Include="DistanceSquared.cs" />
     <Compile Include="EightQueens.cs" />
     <Compile Include="EightQueensIntegers.cs" />

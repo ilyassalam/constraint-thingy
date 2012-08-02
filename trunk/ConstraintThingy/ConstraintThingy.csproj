@@ -45,7 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\SolutionSet.cs" />
-    <Compile Include="Finite Domains\Constraints\ColorTransformer.cs" />
+    <Compile Include="Finite Domains\Constraints\EqualityConstraint.cs" />
+    <Compile Include="Finite Domains\Constraints\Mapping.cs" />
     <Compile Include="Intervals\Reals\Constraints\RealMinConstraint.cs" />
     <Compile Include="Intervals\Reals\Constraints\RealMaxConstraint.cs" />
     <Compile Include="Intervals\Reals\MultiInterval.cs" />
@@ -63,7 +64,7 @@
     <Compile Include="Core\ConstraintArc.cs" />
     <Compile Include="Core\ConstraintComponent.cs" />
     <Compile Include="Core\ConstraintThingySolver.cs" />
-    <Compile Include="Finite Domains\Constraints\EqualityConstraint.cs" />
+    <Compile Include="Finite Domains\Constraints\MappingConstraint.cs" />
     <Compile Include="Finite Domains\Constraints\InequalityConstraint.cs" />
     <Compile Include="Finite Domains\FiniteDomainVariable.cs" />
     <Compile Include="Intervals\Integers\Constraints\IntegerSumConstraint.cs" />

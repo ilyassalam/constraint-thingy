@@ -1358,26 +1358,37 @@ namespace ConstraintThingyTest
         {
             ConstraintThingySolver solver = new ConstraintThingySolver(seed);
 
+
             // topology: https://docs.google.com/a/u.northwestern.edu/drawings/d/1mpZ2gPq7D8mab7PI2PtV4bKYCrrtb7ZS3hg5gwgMa_E/
             //
 
             // declare all of the room types
 
-            FiniteDomain<String> roomType = new FiniteDomain<string>("start", "empty", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door", "end");
+            FiniteDomain<String> roomType = new FiniteDomain<string>("start", "key", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door", "end");
 
             FiniteDomainVariable<String>[] roomTypes = new FiniteDomainVariable<string>[41];
             roomTypes[0] = solver.CreateFiniteDomainVariable(roomType, "start");
 
             for (int i = 1; i <= 13; i++)
             {
-                roomTypes[i] = solver.CreateFiniteDomainVariable(roomType, "empty", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door");
+                roomTypes[i] = solver.CreateFiniteDomainVariable(roomType, "key", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door");
             }
 
             roomTypes[14] = solver.CreateFiniteDomainVariable(roomType, "end");
 
             for (int i = 15; i <= 40; i++)
             {
-                roomTypes[i] = solver.CreateFiniteDomainVariable(roomType, "empty", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door");
+                roomTypes[i] = solver.CreateFiniteDomainVariable(roomType, "key", "small-health-pack", "big-health-pack", "zombie", "two zombies", "dog", "trap", "boss", "locked-door");
+            }
+
+            for (int i = 0; i <= 40; i++)
+            {
+                if (i != 1 && i != 8 && i != 9 && i != 10 && i != 13)
+                {
+                    Constraint.NotEqual(roomTypes[i], "key");
+
+                    Constraint.NotEqual(roomTypes[i], "locked-door");
+                }
             }
 
             // assert that adjacent rooms cannot have the same content
@@ -1465,7 +1476,7 @@ namespace ConstraintThingyTest
                 "small-health-pack".PairedWith(new Interval(20)),
                 "big-health-pack".PairedWith(new Interval(40)),
                 "start".PairedWith(new Interval(0)),
-                "empty".PairedWith(new Interval(0)),
+                "key".PairedWith(new Interval(0)),
                 "zombie".PairedWith(new Interval(-10)),
                 "two zombies".PairedWith(new Interval(-25)),
                 "dog".PairedWith(new Interval(-13)),
@@ -1505,10 +1516,10 @@ namespace ConstraintThingyTest
             playerHealth[0] = solver.CreateRealVariable(100);
             playerHealth[0].RequireUnique = false;
 
-            // player must stay between 0 and 100 health
+            // player must always have above 0 health
             for (int i = 1; i <= 40; i++)
             {
-                playerHealth[i] = solver.CreateRealVariable(10, 100);
+                playerHealth[i] = solver.CreateRealVariable(0, 100000);
                 playerHealth[i].RequireUnique = false;
             }
 
@@ -1570,12 +1581,12 @@ namespace ConstraintThingyTest
                     "small-health-pack".PairedWith(new Interval(0)),
                     "big-health-pack".PairedWith(new Interval(0)),
                     "start".PairedWith(new Interval(0)),
-                    "empty".PairedWith(new Interval(0)),
+                    "key".PairedWith(new Interval(1)),
                     "zombie".PairedWith(new Interval(0)),
                     "two zombies".PairedWith(new Interval(0)),
                     "dog".PairedWith(new Interval(0)),
                     "trap".PairedWith(new Interval(0)),
-                    "boss".PairedWith(new Interval(2)),
+                    "boss".PairedWith(new Interval(0)),
                     "locked-door".PairedWith(new Interval(-1)),
                     "end".PairedWith(new Interval(0)));
 
@@ -1599,63 +1610,39 @@ namespace ConstraintThingyTest
                 lockKeyDelta[i] = Constraint.ScoreVariable(roomTypes[i], keyLockScoring);
             }
 
-            lockKeyDelta[1].RequireUnique = true;
-            lockKeyDelta[1].Precision = 5;
-            lockKeyDelta[1].Priority = 10;
-
-            lockKeyDelta[8].RequireUnique = true;
-            lockKeyDelta[8].Precision = 5;
-            lockKeyDelta[8].Priority = 10;
-
-            lockKeyDelta[9].RequireUnique = true;
-            lockKeyDelta[9].Precision = 5;
-            lockKeyDelta[9].Priority = 10;
-
-            lockKeyDelta[13].RequireUnique = true;
-            lockKeyDelta[13].Precision = 5;
-            lockKeyDelta[13].Priority = 10;
-
             RealVariable[] lockKeyRunningSum = new RealVariable[41];
 
             // require the running sum to stay positive
             for (int i = 0; i <= 40; i++)
             {
-                lockKeyRunningSum[i] = solver.CreateRealVariable(0, 2);
+                lockKeyRunningSum[i] = solver.CreateRealVariable(0, 100);
             }
 
-            // require that the sum at the end be basically equal to 1
-            Constraint.InRange(lockKeyRunningSum[14], 1, 1);
-            
+            // start at 0.
+            Constraint.Equal(lockKeyRunningSum[0], 0);
+
             Constraint.Sum(lockKeyRunningSum[1], lockKeyDelta[1], lockKeyRunningSum[0]);
             Constraint.Sum(lockKeyRunningSum[2], lockKeyDelta[2], lockKeyRunningSum[1]);
 
-            Constraint.Equal(lockKeyRunningSum[2], lockKeyRunningSum[16]);
+            Constraint.Sum(lockKeyRunningSum[3], lockKeyDelta[3], Constraint.Minimize(lockKeyRunningSum[2], lockKeyRunningSum[16]).With(r => r.RequireUnique = false));
 
-            Constraint.Sum(lockKeyRunningSum[3], lockKeyDelta[3], lockKeyRunningSum[2]);
-
-            Constraint.Equal(lockKeyRunningSum[3], lockKeyRunningSum[23], lockKeyRunningSum[16], lockKeyRunningSum[18]);
-            Constraint.Sum(lockKeyRunningSum[4], lockKeyDelta[4], lockKeyRunningSum[3]);
+            Constraint.Sum(lockKeyRunningSum[4], lockKeyDelta[4], Constraint.Minimize(lockKeyRunningSum[3], lockKeyRunningSum[23], lockKeyRunningSum[16], lockKeyRunningSum[18]).With(r => r.RequireUnique = false));
 
             Constraint.Sum(lockKeyRunningSum[5], lockKeyDelta[5], lockKeyRunningSum[1]);
 
-            Constraint.Equal(lockKeyRunningSum[5], lockKeyRunningSum[25]);
-            Constraint.Sum(lockKeyRunningSum[6], lockKeyDelta[6], lockKeyRunningSum[5]);
+            Constraint.Sum(lockKeyRunningSum[6], lockKeyDelta[6], Constraint.Minimize(lockKeyRunningSum[5], lockKeyRunningSum[25]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[6], lockKeyRunningSum[27]);
-            Constraint.Sum(lockKeyRunningSum[7], lockKeyDelta[7], lockKeyRunningSum[6]);
+            Constraint.Sum(lockKeyRunningSum[7], lockKeyDelta[7], Constraint.Minimize(lockKeyRunningSum[6], lockKeyRunningSum[27]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[4], lockKeyRunningSum[7]);
-            Constraint.Sum(lockKeyRunningSum[8], lockKeyDelta[8], lockKeyRunningSum[4]);
+            Constraint.Sum(lockKeyRunningSum[8], lockKeyDelta[8], Constraint.Minimize(lockKeyRunningSum[4], lockKeyRunningSum[7]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[8], lockKeyRunningSum[35], lockKeyRunningSum[39]);
-            Constraint.Sum(lockKeyRunningSum[9], lockKeyDelta[9], lockKeyRunningSum[8]);
+            Constraint.Sum(lockKeyRunningSum[9], lockKeyDelta[9], Constraint.Minimize(lockKeyRunningSum[8], lockKeyRunningSum[35], lockKeyRunningSum[39]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[10], lockKeyDelta[10], lockKeyRunningSum[9]);
 
             Constraint.Sum(lockKeyRunningSum[11], lockKeyDelta[11], lockKeyRunningSum[10]);
             Constraint.Sum(lockKeyRunningSum[12], lockKeyDelta[12], lockKeyRunningSum[10]);
 
-            Constraint.Equal(lockKeyRunningSum[11], lockKeyRunningSum[12], lockKeyRunningSum[10], lockKeyRunningSum[22], lockKeyRunningSum[32]);
-            Constraint.Sum(lockKeyRunningSum[13], lockKeyDelta[13], lockKeyRunningSum[11]);
+            Constraint.Sum(lockKeyRunningSum[13], lockKeyDelta[13], Constraint.Minimize(lockKeyRunningSum[11], lockKeyRunningSum[12], lockKeyRunningSum[10], lockKeyRunningSum[22], lockKeyRunningSum[32]).With(r => r.RequireUnique = false));
 
             Constraint.Sum(lockKeyRunningSum[14], lockKeyDelta[14], lockKeyRunningSum[13]);
 
@@ -1663,59 +1650,49 @@ namespace ConstraintThingyTest
             Constraint.Sum(lockKeyRunningSum[16], lockKeyDelta[16], lockKeyRunningSum[15]);
             Constraint.Sum(lockKeyRunningSum[17], lockKeyDelta[17], lockKeyRunningSum[16]);
 
-            Constraint.Equal(lockKeyRunningSum[15], lockKeyRunningSum[17]);
-            Constraint.Sum(lockKeyRunningSum[18], lockKeyDelta[18], lockKeyRunningSum[15]);
+            Constraint.Sum(lockKeyRunningSum[18], lockKeyDelta[18], Constraint.Minimize(lockKeyRunningSum[15], lockKeyRunningSum[17]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[19], lockKeyDelta[19], lockKeyRunningSum[10]);
 
-            Constraint.Equal(lockKeyRunningSum[19], lockKeyRunningSum[11]);
-            Constraint.Sum(lockKeyRunningSum[20], lockKeyDelta[20], lockKeyRunningSum[19]);
+            Constraint.Sum(lockKeyRunningSum[20], lockKeyDelta[20], Constraint.Minimize(lockKeyRunningSum[19], lockKeyRunningSum[11]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[21], lockKeyDelta[21], lockKeyRunningSum[11]);
             Constraint.Sum(lockKeyRunningSum[22], lockKeyDelta[22], lockKeyRunningSum[21]);
 
-            Constraint.Equal(lockKeyRunningSum[2], lockKeyRunningSum[5]);
-            Constraint.Sum(lockKeyRunningSum[23], lockKeyDelta[23], lockKeyRunningSum[2]);
+            Constraint.Sum(lockKeyRunningSum[23], lockKeyDelta[23], Constraint.Minimize(lockKeyRunningSum[2], lockKeyRunningSum[5]).With(r => r.RequireUnique = false));
 
             Constraint.Sum(lockKeyRunningSum[24], lockKeyDelta[24], lockKeyRunningSum[1]);
             Constraint.Sum(lockKeyRunningSum[25], lockKeyDelta[25], lockKeyRunningSum[24]);
-            Constraint.Equal(lockKeyRunningSum[25], lockKeyRunningSum[6]);
-            Constraint.Sum(lockKeyRunningSum[26], lockKeyDelta[26], lockKeyRunningSum[25]);
+
+            Constraint.Sum(lockKeyRunningSum[26], lockKeyDelta[26], Constraint.Minimize(lockKeyRunningSum[25], lockKeyRunningSum[6]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[27], lockKeyDelta[27], lockKeyRunningSum[26]);
 
             Constraint.Sum(lockKeyRunningSum[28], lockKeyDelta[28], lockKeyRunningSum[10]);
 
-            Constraint.Equal(lockKeyRunningSum[28], lockKeyRunningSum[12]);
-            Constraint.Sum(lockKeyRunningSum[29], lockKeyDelta[29], lockKeyRunningSum[28]);
+            Constraint.Sum(lockKeyRunningSum[29], lockKeyDelta[29], Constraint.Minimize(lockKeyRunningSum[28], lockKeyRunningSum[12]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[29], lockKeyRunningSum[12]);
-            Constraint.Sum(lockKeyRunningSum[30], lockKeyDelta[30], lockKeyRunningSum[29]);
-            Constraint.Equal(lockKeyRunningSum[30], lockKeyRunningSum[12]);
-            Constraint.Sum(lockKeyRunningSum[31], lockKeyDelta[31], lockKeyRunningSum[30]);
+            Constraint.Sum(lockKeyRunningSum[30], lockKeyDelta[30], Constraint.Minimize(lockKeyRunningSum[29], lockKeyRunningSum[12]).With(r => r.RequireUnique = false));
+
+            Constraint.Sum(lockKeyRunningSum[31], lockKeyDelta[31], Constraint.Minimize(lockKeyRunningSum[30], lockKeyRunningSum[12]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[32], lockKeyDelta[32], lockKeyRunningSum[31]);
 
             Constraint.Sum(lockKeyRunningSum[33], lockKeyDelta[33], lockKeyRunningSum[8]);
             Constraint.Sum(lockKeyRunningSum[34], lockKeyDelta[34], lockKeyRunningSum[33]);
 
-            Constraint.Equal(lockKeyRunningSum[33], lockKeyRunningSum[34]);
-            Constraint.Sum(lockKeyRunningSum[35], lockKeyDelta[35], lockKeyRunningSum[33]);
+            Constraint.Sum(lockKeyRunningSum[35], lockKeyDelta[35], Constraint.Minimize(lockKeyRunningSum[33], lockKeyRunningSum[34]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[8], lockKeyRunningSum[33]);
-            Constraint.Sum(lockKeyRunningSum[36], lockKeyDelta[36], lockKeyRunningSum[8]);
+            Constraint.Sum(lockKeyRunningSum[36], lockKeyDelta[36], Constraint.Minimize(lockKeyRunningSum[8], lockKeyRunningSum[33]).With(r => r.RequireUnique = false));
             Constraint.Sum(lockKeyRunningSum[37], lockKeyDelta[37], lockKeyRunningSum[36]);
             Constraint.Sum(lockKeyRunningSum[38], lockKeyDelta[38], lockKeyRunningSum[37]);
 
-            Constraint.Equal(lockKeyRunningSum[40], lockKeyRunningSum[37], lockKeyRunningSum[38]);
-            Constraint.Sum(lockKeyRunningSum[39], lockKeyDelta[39], lockKeyRunningSum[40]);
+            Constraint.Sum(lockKeyRunningSum[39], lockKeyDelta[39], Constraint.Minimize(lockKeyRunningSum[40], lockKeyRunningSum[37], lockKeyRunningSum[38]).With(r => r.RequireUnique = false));
 
-            Constraint.Equal(lockKeyRunningSum[33], lockKeyRunningSum[36], lockKeyRunningSum[37]);
-            Constraint.Sum(lockKeyRunningSum[40], lockKeyDelta[40], lockKeyRunningSum[33]);
+            Constraint.Sum(lockKeyRunningSum[40], lockKeyDelta[40], Constraint.Minimize(lockKeyRunningSum[33], lockKeyRunningSum[36], lockKeyRunningSum[37]).With(r => r.RequireUnique = false));
 
-            //Constraint.LimitOccurences("trap", 2, 4, roomTypes);
-            //Constraint.MaximumOccurences("small-health-pack", 5, roomTypes);
+            Constraint.LimitOccurences("trap", 2, 4, roomTypes);
+
+            //Constraint.MaximumOccurences("small-health-pack", 8, roomTypes);
             //Constraint.MaximumOccurences("big-health-pack", 8, roomTypes);
-            //Constraint.MaximumOccurences("empty", 4, roomTypes);
 
             Constraint.RequireOccurences("boss", 1, roomTypes);
-            Constraint.RequireOccurences("locked-door", 1, roomTypes);
 
             int numSolutions = 0;
             foreach (var solution in solver.Solutions.FirstElements(5))
@@ -1752,6 +1729,48 @@ namespace ConstraintThingyTest
         public void SolvingAnActualLevel13()
         {
             SolveBigLevel(5);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel14()
+        {
+            SolveBigLevel(6);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel15()
+        {
+            SolveBigLevel(7);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel16()
+        {
+            SolveBigLevel(8);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel17()
+        {
+            SolveBigLevel(9);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel18()
+        {
+            SolveBigLevel(10);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel19()
+        {
+            SolveBigLevel(11);
+        }
+
+        [TestMethod]
+        public void SolvingAnActualLevel20()
+        {
+            SolveBigLevel(12);
         }
     }
 }

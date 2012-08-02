@@ -43,7 +43,7 @@ namespace ConstraintThingy
         {
             Debug.Assert(i < MaxSize && i >= 0);
 
-            return set | (~ GetMask(i));
+            return set & (~ GetMask(i));
         }
 
         /// <summary>

@@ -75,7 +75,7 @@ namespace Tests
             var x = new FiniteDomainVariable("x", d);
             string[] answers = new[] { "red", "blue"};
 
-            x.Value = 5;  // should be red + blue;
+            x.SetValueOrThrowException(5, null);  // should be red + blue;
             int answerCounter = 0;
 #pragma warning disable 168
             foreach (var ignore in x.UniqueValues())
@@ -118,7 +118,7 @@ namespace Tests
             var d = new FiniteDomain("red", "green", "blue");
             var x = new FiniteDomainVariable("x", d);
             Assert.IsFalse(x.IsEmpty);
-            x.Value = 0;
+            x.SetValueOrThrowException(0, null);
             Assert.IsTrue(x.IsEmpty);
         }
 
@@ -133,7 +133,7 @@ namespace Tests
             Assert.IsFalse(x.IsUnique);
             x.UniqueValue = "red";
             Assert.IsTrue(x.IsUnique);
-            x.Value = 0;
+            x.SetValueOrThrowException(0, null);
             Assert.IsFalse(x.IsUnique);
         }
 

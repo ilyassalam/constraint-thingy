@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Intervals;
 
@@ -38,11 +39,18 @@ namespace ConstraintThingy
             get { return Value.IsEmpty; }
         }
 
-        public void NarrowTo(Interval restriction)
+        /// <summary>
+        /// Narrows variable to the intersection of its current value and RESTRICTION.
+        /// </summary>
+        public void NarrowTo(Interval restriction, ref bool success)
         {
+            // TODO: FIGURE OUT WHY THIS ISNT OPTIMIZED TO ONLY DO ONE INTERSECTION.
             if (!Interval.Intersects(Value, restriction))
-                throw new Failure("Narrowed to empty set");
-            Value = Interval.Intersection(Value, restriction);
+            {
+                success = false;
+                return;
+            }
+            TrySetValue(Interval.Intersection(Value, restriction), ref success);
         }
 
         /// <summary>
@@ -50,41 +58,45 @@ namespace ConstraintThingy
         /// </summary>
         public override IEnumerable<bool> UniqueValues()
         {
-            yield return true;
+            throw new NotImplementedException();
+            //yield return true;
           
-            Stack<Interval> candidates = new Stack<Interval>();
-            candidates.Push(Value);
+            //Stack<Interval> candidates = new Stack<Interval>();
+            //candidates.Push(Value);
 
-            // continue while there are still possibilities
-            while (candidates.Count > 0)
-            {
-                var candidate = candidates.Pop();
+            //// continue while there are still possibilities
+            //while (candidates.Count > 0)
+            //{
+            //    var candidate = candidates.Pop();
 
-                int mark = SaveValues();
+            //    int mark = SaveValues();
 
-                bool success = false;
-                try
-                {
-                    Value = candidate;
-                    success = true;
-                }
-                catch (Failure) { }
+            //    bool success = false;
+            //    try
+            //    {
+            //        Value = candidate;
+            //        success = true;
+            //    }
+            //    catch (Failure) { }
 
-                if (success) 
-                {
-                    yield return false;
+            //    if (success) 
+            //    {
+            //        yield return false;
 
-                    if (!IsUnique)
-                    {
-                        candidates.Push(candidate.UpperHalf);
-                        candidates.Push(candidate.LowerHalf);
-                    }
-                }
+            //        if (!IsUnique)
+            //        {
+            //            candidates.Push(candidate.UpperHalf);
+            //            candidates.Push(candidate.LowerHalf);
+            //        }
+            //    }
 
-                RestoreValues(mark);
-            }
+            //    RestoreValues(mark);
+            // }
         }
 
+        /// <summary>
+        /// Creates a new variable that is pre-constrained to be the sum of VARS
+        /// </summary>
         public static IntervalVariable Sum(IEnumerable<IntervalVariable> vars)
         {
             IntervalVariable sum = new IntervalVariable("sum", new Interval(float.MinValue, float.MaxValue));

@@ -16,7 +16,7 @@ namespace ConstraintThingy
         public void AssignmentTest()
         {
             var x = new Variable<int>("x", 0);
-            x.Value = 1;
+            x.SetValueOrThrowException(1, null);
             Assert.AreEqual(1, x.Value);
         }
 
@@ -25,15 +25,15 @@ namespace ConstraintThingy
         {
             Variable.ResetVariableSystemForTesting();
             var x = new Variable<int>("x", 0);
-            x.Value = 1;
+            x.SetValueOrThrowException(1, null);
             // The abolve assignment should not have caused a spill.
             Assert.AreEqual(0, Variable.StackDepth);
             var frame = Variable.SaveValues();
-            x.Value = 2;
+            x.SetValueOrThrowException(2, null);
             Assert.AreEqual(2, x.Value);
             // The above should have spilled the stack.
             Assert.AreEqual(1, Variable.StackDepth);
-            x.Value = 3;
+            x.SetValueOrThrowException(3, null);
             Assert.AreEqual(3, x.Value);
             // The above should *not* have spilled the stack.
             Assert.AreEqual(1, Variable.StackDepth);
@@ -46,11 +46,11 @@ namespace ConstraintThingy
             //
             //  Now let's see if we can do it again
             //
-            x.Value = 2;
+            x.SetValueOrThrowException(2, null);
             Assert.AreEqual(2, x.Value);
             // The above should have spilled the stack.
             Assert.AreEqual(1, Variable.StackDepth);
-            x.Value = 3;
+            x.SetValueOrThrowException(3, null);
             Assert.AreEqual(3, x.Value);
             // The above should *not* have spilled the stack.
             Assert.AreEqual(1, Variable.StackDepth);

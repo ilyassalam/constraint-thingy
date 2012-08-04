@@ -1,3 +1,4 @@
+using System;
 using Intervals;
 
 namespace ConstraintThingy
@@ -12,36 +13,44 @@ namespace ConstraintThingy
         /// </summary>
         public IntervalEqualityConstraint(IntervalVariable left, IntervalVariable right) : base(new [] { left, right })
         {
-            InitializeVariables();
+            bool succeeded = true;
+            InitializeVariables(ref succeeded);
+            if (!succeeded)
+                throw new Exception("IntervalEqualityConstraint is unsatisfiable even before narrowing.");
         }
 
         private IntervalVariable Left { get { return Variables[0]; } }
         private IntervalVariable Right { get { return Variables[1]; } }
 
-        private void InitializeVariables()
+        private void InitializeVariables(ref bool succeeded)
         {
             Interval intersection = Interval.Intersection(Left.Value, Right.Value);
 
-            if (intersection.IsEmpty) throw new Failure("There are no shared possible values between the two intervals.");
+            if (intersection.IsEmpty)
+            {
+                succeeded = false;
+                return;
+            }
 
-            Left.Value = intersection;
-            Right.Value = intersection;
+            Left.TrySetValue(intersection, ref succeeded);
+            if (!succeeded) return;
+            Right.TrySetValue(intersection, ref succeeded);
         }
 
         /// <summary>
         /// Updates variables when required
         /// </summary>
-        public override void UpdateVariable(IntervalVariable var)
+        public override void UpdateVariable(IntervalVariable var, ref bool succeeded)
         {
             IntervalVariable otherVariable = (var == Left) ? Right : Left;
 
             if (var.Value.Contains(otherVariable.Value))
             {
-                var.Value = otherVariable.Value;
+                var.TrySetValue(otherVariable.Value, ref succeeded);
             }
             else
             {
-                throw new Failure("The other variable's value does not intersect this variable's range");
+                succeeded = false;
             }
         }
     }

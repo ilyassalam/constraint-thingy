@@ -14,9 +14,12 @@ namespace ConstraintThingy
         public IntervalSumConstraint(IntervalVariable sum, params IntervalVariable[] variables)
             : base(MergeParameters(sum, variables))
         {
+            bool succeeded = true;
             for (int i = 0; i < variables.Length; i++)
             {
-                UpdateVariable(Variables[i]);
+                UpdateVariable(Variables[i], ref succeeded);
+                if (!succeeded)
+                    throw new Exception("IntervalSumConstraint is unsatisfiable even before narrowing.");
             }
         }
 
@@ -74,7 +77,7 @@ namespace ConstraintThingy
         /// <summary>
         /// Tries to narrow the variable based on the constraint.
         /// </summary>
-        public override void UpdateVariable(IntervalVariable var)
+        public override void UpdateVariable(IntervalVariable var, ref bool succeeded)
         {
             //Interval intersection = NarrowConstraint(var);
 
@@ -86,7 +89,7 @@ namespace ConstraintThingy
             //{
             //    throw new Failure("The intersection interval was not in the allowable range for this variable.");
             //}
-            var.NarrowTo(NarrowConstraint(var));
+            var.NarrowTo(NarrowConstraint(var), ref succeeded);
         }
 
         

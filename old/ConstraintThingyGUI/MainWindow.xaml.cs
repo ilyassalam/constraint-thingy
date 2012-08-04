@@ -58,16 +58,19 @@ namespace ConstraintThingyGUI
             //contents.LimitOccurences("Big monster", 1, 3);
             //contents.LimitOccurences("Little monster", 1, 5);
             //contents.LimitOccurences("Health pack", 1, 3);
-            contents.LimitOccurences("Big monster", 3, 8);
-            contents.LimitOccurences("Little monster", 5, 10);
-            contents.LimitOccurences("Health pack", 1, 10);
+            contents.LimitOccurences("Big monster", 10, 20);
+            contents.LimitOccurences("Little monster", 20, 40);
+            contents.LimitOccurences("Health pack", 4, 40);
             var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5,
                                           "Health pack", 10);
             //var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N1"), graph.FindNode("N10"));
             var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N24"), graph.FindNode("N12"));
+            bool succeeded = true;
             foreach (var n in graph.Nodes)
                 if (n.SupportRecipient == null)
-                    totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue));
+                    totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue), ref succeeded);
+            if (!succeeded)
+                throw new Exception("Initialization of totalHealth failed.");
 
             solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
             graphCanvas.UpdateText();
@@ -104,12 +107,16 @@ namespace ConstraintThingyGUI
         void AllSolutions()
         {
             Cursor = Cursors.Wait;
-            System.GC.Collect(0);
-            int collections = System.GC.CollectionCount(0);
+            GC.Collect(0);
+            int collections = GC.CollectionCount(0);
             timer.Reset();
             timer.Start();
             int solutions = 0;
-            while (solutionIterator.MoveNext() && solutions<1000000) solutions++;
+            while (solutions<10000)
+            {
+                Variable.SolutionsAllVariables().GetEnumerator().MoveNext();
+                solutions++;
+            }
             timer.Stop();
             solutionTime.Content = string.Format("{0} solutions, {1}ms, mean={2}\nTotal variables {3}\nTotal backtracks {4}\nMaximum undo stack depth {5}\n{6} collections at generation 0", 
                 solutions, 
@@ -118,15 +125,14 @@ namespace ConstraintThingyGUI
                 Variable.TotalVariables,
                 Variable.TotalBacktracks,
                 Variable.MaxUndoStackDepth,
-                System.GC.CollectionCount(0)-collections);
+                GC.CollectionCount(0)-collections);
             graphCanvas.UpdateText();
             Cursor = Cursors.Arrow;
         }
 
         void ChooseFile()
         {
-            OpenFileDialog d = new OpenFileDialog();
-            d.Filter = "CSV files (*.csv)|*.csv";
+            OpenFileDialog d = new OpenFileDialog {Filter = "CSV files (*.csv)|*.csv"};
             d.ShowDialog();
             filePath = d.FileName;
             ReloadGraph();

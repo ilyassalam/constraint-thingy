@@ -62,6 +62,14 @@ namespace ConstraintThingy
         }
 
         /// <summary>
+        /// The elements that were narrowed away in the last update.
+        /// </summary>
+        public UInt64 NarrowedElements
+        {
+            get { return Value ^ PreviousValue; }
+        }
+
+        /// <summary>
         /// Try each remaining possible value of the variable, bind the variable to just that value, and yield.
         /// </summary>
         /// <returns>Always returns true.</returns>
@@ -71,22 +79,20 @@ namespace ConstraintThingy
                 yield return true;
             else
             {
+                Shuffler shuffler = new Shuffler(Domain.Size);
                 int mark = SaveValues();
-                for (int i = 0; i < Domain.Size; i++)
+                for (int count = 0; count < Domain.Size; count++)
                 {
+                    int i = shuffler.Next();
                     // Try the ith element of Domain
                     UInt64 candidate = 1UL << i;
                     if ((Value & candidate) != 0)
                     {
-                        bool success = false;
-                        try
-                        {
-                            Value = candidate;
-                            success = true;
-                        }
-                        catch (Failure) { }
+                        bool succeeded = true;
 
-                        if (success)
+                        TrySetValue(candidate, ref succeeded);
+
+                        if (succeeded)
                             yield return false;
                         RestoreValues(mark);
                     }
@@ -114,7 +120,10 @@ namespace ConstraintThingy
                 int index = Array.IndexOf(Domain.Elements, value);
                 if (index<0)
                     throw new ArgumentException("Unknown domain element: "+value);
-                Value = 1UL << index;
+                bool succeeded = true;
+                TrySetValue(1UL << index, ref succeeded);
+                if (!succeeded)
+                    throw new Exception("Attempting to set FD variable to a unique string value failed.");
             }
         }
 

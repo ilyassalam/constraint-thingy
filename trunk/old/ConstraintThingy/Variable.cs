@@ -9,10 +9,24 @@ namespace ConstraintThingy
     public abstract class Variable
     {
         static readonly List<Variable> AllVariables = new List<Variable>();
+        /// <summary>
+        /// Total number of variables created.
+        /// Used only for performance measurement.
+        /// </summary>
         public static int TotalVariables { get; private set; }
+        /// <summary>
+        /// Maximum depth the undostack has reached.
+        /// Used only for performance measurement.
+        /// </summary>
         public static int MaxUndoStackDepth { get; private set; }
+        /// <summary>
+        /// Total number of times the system has backtracked.
+        /// Used only for performance measurement.
+        /// </summary>
         public static int TotalBacktracks { get; private set; }
-
+        /// <summary>
+        /// Resets the performance statistics.
+        /// </summary>
         public static void ResetStatistics()
         {
             TotalBacktracks = TotalVariables = MaxUndoStackDepth = 0;
@@ -224,20 +238,51 @@ namespace ConstraintThingy
         public T Value
         {
             get { return mValue; }
-            set
-            {
-                if (!EqualityComparer<T>.Default.Equals(mValue, value))
-                {
-                    if (lastSaveFramePointer != currentFramePointer)
-                        SaveValue();
-                    mValue = value;
-                    foreach (var c in constraints)
-                        c.Narrowed(this);
-                    Constraint.ResolveCurrentConstraints();
-                }
-            }
+        }
+
+        /// <summary>
+        /// Value of variable before last update.
+        /// Only valid immediately after a call to TrySetValue.  Will not be restored when the undo stack is popped.
+        /// </summary>
+        public T PreviousValue
+        {
+            get { return mPreviousValue; }
         }
         private T mValue;
+        private T mPreviousValue;
+
+        /// <summary>
+        /// Attempts to narrow the variables value to VALUE.
+        /// </summary>
+        public void TrySetValue(T value, ref bool succeeded)
+        {
+            if (!EqualityComparer<T>.Default.Equals(mValue, value))
+            {
+                if (lastSaveFramePointer != currentFramePointer)
+                    SaveValue();
+                mPreviousValue = mValue;
+                mValue = value;
+                foreach (var c in constraints)
+                {
+                    c.Narrowed(this, ref succeeded);
+                    if (!succeeded)
+                        return;
+                }
+                Constraint.ResolveCurrentConstraints(ref succeeded);
+            }
+        }
+
+        /// <summary>
+        /// Attempts to set variable to the specified value.  Throws an exception if it fails.
+        /// Intended to be used for initialization only.
+        /// </summary>
+        public void SetValueOrThrowException(T value, string failureMessage)
+        {
+            bool succeeded = true;
+            TrySetValue(value, ref succeeded);
+            if (!succeeded)
+                throw new Exception(failureMessage??"Setting variable failed.");
+        }
         #endregion
         
         #region Undostack management

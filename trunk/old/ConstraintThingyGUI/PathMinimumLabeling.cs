@@ -7,8 +7,14 @@ using Intervals;
 
 namespace ConstraintThingyGUI
 {
+    /// <summary>
+    /// A labeling for a min-type path function.
+    /// </summary>
     public class PathMinimumLabeling : IntervalLabeling
     {
+        /// <summary>
+        /// Creates a new labeling for a min-type path function.
+        /// </summary>
         public PathMinimumLabeling(string name, IntervalLabeling integrand, Func<Node, IEnumerable<Node>> predecessors)
             : base(name, new Interval(float.MinValue, float.MaxValue))
         {
@@ -19,6 +25,9 @@ namespace ConstraintThingyGUI
         private readonly IntervalLabeling integrand;
         private readonly Func<Node, IEnumerable<Node>> predecessors;
 
+        /// <summary>
+        /// Makes a variable to hold the value of the labeling on node N.
+        /// </summary>
         protected override IntervalVariable MakeVariable(Node n)
         {
             var result = base.MakeVariable(n);
@@ -30,7 +39,7 @@ namespace ConstraintThingyGUI
                                               : IntervalVariable.Sum(n.Support.Select(s => integrand.ValueVariable(s)).Concat(new[] { integrand.ValueVariable(n) })),
                                           ValueVariables(preds));
             else
-                result.Value = new Interval(0,0);
+                result.SetValueOrThrowException(new Interval(0,0), "Could not create path variable");
             return result;
         }
 
@@ -47,7 +56,7 @@ namespace ConstraintThingyGUI
             private const int integrandPosition = 1;
             private const int predecessorStart = 2;
 
-            public override void Narrowed(Variable narrowedVariable)
+            public override void Narrowed(Variable narrowedVariable, ref bool succeeded)
             {
                 // The integrand value or a predecessor was narrowed.
                 Interval min = Variables[predecessorStart].Value;
@@ -59,44 +68,60 @@ namespace ConstraintThingyGUI
                     // The sum was narrowed
                     Interval sum = Variables[sumPosition].Value;
                     //Variables[integrandPosition].NarrowTo(new Interval(sum.LowerBound-min.UpperBound, sum.UpperBound-min.LowerBound));
-                    Variables[integrandPosition].NarrowTo(sum - min);
+                    Variables[integrandPosition].NarrowTo(sum - min, ref succeeded);
+                    if (!succeeded) return;
                     var integrand = Variables[integrandPosition].Value;
                     //Interval newMin = new Interval(sum.LowerBound - integrand.UpperBound,
                     //                               sum.UpperBound - integrand.LowerBound);
                     Interval newMin = sum - integrand;
-                    for (int i=predecessorStart+1; i<Variables.Length; i++)
-                        Variables[i].NarrowTo(newMin);
+                    for (int i = predecessorStart + 1; i < Variables.Length; i++)
+                    {
+                        Variables[i].NarrowTo(newMin, ref succeeded);
+                        if (!succeeded) return;
+                    }
                 }
                 else if (narrowedVariable == Variables[integrandPosition])
                 {
                     // The integrand was narrowed
                     Interval integrand = Variables[integrandPosition].Value;
                     //Variables[integrandPosition].NarrowTo(new Interval(sum.LowerBound-min.UpperBound, sum.UpperBound-min.LowerBound));
-                    Variables[sumPosition].NarrowTo(integrand + min);
+                    Variables[sumPosition].NarrowTo(integrand + min, ref succeeded);
+                    if (!succeeded) return;
                     var sum = Variables[sumPosition].Value;
                     //Interval newMin = new Interval(sum.LowerBound - integrand.UpperBound,
                     //                               sum.UpperBound - integrand.LowerBound);
                     Interval newMin = sum - integrand;
                     for (int i = predecessorStart + 1; i < Variables.Length; i++)
-                        Variables[i].NarrowTo(newMin);
+                    {
+                        Variables[i].NarrowTo(newMin, ref succeeded);
+                        if (!succeeded) return;
+                    }
                 }
                 else
                 {
                     // Min changed
-                    Variables[sumPosition].NarrowTo(min + Variables[integrandPosition].Value);
-                    Variables[integrandPosition].NarrowTo(Variables[sumPosition].Value-min);
+                    Variables[sumPosition].NarrowTo(min + Variables[integrandPosition].Value, ref succeeded);
+                    if (!succeeded) return;
+                    Variables[integrandPosition].NarrowTo(Variables[sumPosition].Value-min, ref succeeded);
+                    // if (!succeeded) return;
                 }
             }
 
-            public override void UpdateVariable(IntervalVariable var)
+            public override void UpdateVariable(IntervalVariable var, ref bool succeeded)
             {
                 throw new NotImplementedException();
             }
         }
     }
 
+    /// <summary>
+    /// A min-type path function with a designated start and end node.
+    /// </summary>
     public class StartEndPathLabeling : PathMinimumLabeling
     {
+        /// <summary>
+        /// Creates a min-type path function with a designated start and end node.
+        /// </summary>
         public StartEndPathLabeling(string name, IntervalLabeling integrand, UndirectedGraph graph, float startValue, Node start, Node end)
             : base(name, integrand, node => Predecessors(node, graph, start, end))
         {

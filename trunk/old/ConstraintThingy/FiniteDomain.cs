@@ -8,6 +8,10 @@ namespace ConstraintThingy
     public class FiniteDomain
     {
         /// <summary>
+        /// Constant representing the mepty set.
+        /// </summary>
+        public const ulong EmptySet = 0UL;
+        /// <summary>
         /// Represents a finite set that forms the possible values of a FiniteDomainVariable.
         /// </summary>
         public FiniteDomain(params string[] elts)
@@ -27,6 +31,9 @@ namespace ConstraintThingy
             get { return Elements.Length; }
         }
 
+        /// <summary>
+        /// Constant representing all elements of this finite domain.
+        /// </summary>
         public UInt64 UniverseMask { get { return (1UL << Size) - 1; } }
 
         /// <summary>

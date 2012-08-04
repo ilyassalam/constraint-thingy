@@ -110,16 +110,26 @@ namespace ConstraintThingyGUI
             private readonly IntervalVariable score;
             private readonly FiniteDomainVariable label;
 
-            public override void Narrowed(Variable narrowedVariable)
+            public override void Narrowed(Variable narrowedVariable, ref bool succeeded)
             {
                 if (narrowedVariable == score)
-                    label.Value &= scoreLabeling.IntervalMask(score.Value);
+                {
+                    var newValue = label.Value & scoreLabeling.IntervalMask(score.Value);
+                    if (newValue==FiniteDomain.EmptySet)
+                    {
+                        succeeded = false;
+                        return;
+                    }
+                    label.TrySetValue(newValue, ref succeeded);
+                }
                 else
+                {
                     // narrowedVariable == label
-                    score.Value = Interval.Intersection(score.Value, scoreLabeling.ScoreInterval(label.Value));
+                    score.TrySetValue(Interval.Intersection(score.Value, scoreLabeling.ScoreInterval(label.Value)), ref succeeded);
+                }
             }
 
-            public override void UpdateVariable(Variable var)
+            public override void UpdateVariable(Variable var, ref bool succeeded)
             {
                 throw new NotImplementedException();
             }

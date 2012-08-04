@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ConstraintThingy
 {
@@ -24,16 +23,16 @@ namespace ConstraintThingy
         /// <summary>
         /// Update variables that could potentially be narrowed by narrowings that have happened so far.
         /// </summary>
-        public static void ResolveCurrentConstraints()
+        public static void ResolveCurrentConstraints(ref bool succeeded)
         {
-            while (worklist.Count > 0)
-                worklist.Dequeue().Update();
+            while (succeeded && worklist.Count > 0)
+                worklist.Dequeue().Update(ref succeeded);
         }
 
         /// <summary>
         /// Called when one of the variables participating in the constraint is narrowed.
         /// </summary>
-        public abstract void Narrowed(Variable narrowedVariable);
+        public abstract void Narrowed(Variable narrowedVariable, ref bool succeeded);
     }
 
     /// <summary>
@@ -93,7 +92,7 @@ namespace ConstraintThingy
         /// <summary>
         /// Called when one of the variables participating in the constraint is narrowed.
         /// </summary>
-        public override void Narrowed(Variable narrowedVariable)
+        public override void Narrowed(Variable narrowedVariable, ref bool succeeded)
         {
             foreach (var a in arcs)
                 if (a.Variable != narrowedVariable)
@@ -103,6 +102,6 @@ namespace ConstraintThingy
         /// <summary>
         /// Tries to narrow the variable based on the constraint.  Returns false if variable cannot be narrowed.
         /// </summary>
-        public abstract void UpdateVariable(VType var);
+        public abstract void UpdateVariable(VType var, ref bool succeeded);
     }
 }

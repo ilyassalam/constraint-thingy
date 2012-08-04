@@ -7,7 +7,7 @@ namespace ConstraintThingy
     /// </summary>
     abstract class ConstraintArc
     {
-        internal abstract void Update();
+        internal abstract void Update(ref bool succeeded);
 
         protected bool queuedForUpdate;
 
@@ -40,10 +40,10 @@ namespace ConstraintThingy
             }
         }
 
-        internal override void Update()
+        internal override void Update(ref bool succeeded)
         {
             queuedForUpdate = false;
-            Constraint.UpdateVariable(Variable);
+            Constraint.UpdateVariable(Variable, ref succeeded);
         }
     }
 }

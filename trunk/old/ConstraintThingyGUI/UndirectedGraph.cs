@@ -213,6 +213,9 @@ namespace ConstraintThingyGUI
             return graph;
         }
 
+        /// <summary>
+        /// Returns the node with the given name.
+        /// </summary>
         public Node FindNode(string name)
         {
             foreach (var n in Nodes)

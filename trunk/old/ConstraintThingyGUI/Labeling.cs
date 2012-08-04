@@ -34,6 +34,9 @@ namespace ConstraintThingyGUI
         /// </summary>
         public static readonly List<Labeling> AllLabelings = new List<Labeling>();
 
+        /// <summary>
+        /// Removes all labelings from the system.
+        /// </summary>
         public static void ResetLabelings()
         {
             AllLabelings.Clear();
@@ -184,6 +187,9 @@ namespace ConstraintThingyGUI
     /// </summary>
     public class IntervalLabeling : Labeling<IntervalVariable>
     {
+        /// <summary>
+        /// Creates a labeling whose value is a numeric interval.
+        /// </summary>
         public IntervalLabeling(string name, Interval range) : base(name)
         {
             InitialRange = range;
@@ -194,11 +200,17 @@ namespace ConstraintThingyGUI
         /// </summary>
         public Interval InitialRange;
 
+        /// <summary>
+        /// Creates a variable to hold the value of the labeling for a specific node.
+        /// </summary>
         protected override IntervalVariable MakeVariable(Node n)
         {
             return new IntervalVariable(string.Format("{0}:{1}", n.Name, Name), InitialRange);
         }
 
+        /// <summary>
+        /// The value set of the labeling for a given node.
+        /// </summary>
         public override object this[Node n]
         {
             get
@@ -209,12 +221,15 @@ namespace ConstraintThingyGUI
             {
                 Debug.Assert(value != null, "value != null");
                 if (value is float || value is double || value is int)
-                    ValueVariable(n).Value = new Interval(Convert.ToSingle(value), Convert.ToSingle(value));
+                    ValueVariable(n).SetValueOrThrowException(new Interval(Convert.ToSingle(value), Convert.ToSingle(value)), "Chosen value for labeling is inconsistent.");
                 else
-                    ValueVariable(n).Value = (Interval)value;
+                    ValueVariable(n).SetValueOrThrowException((Interval)value, "Chosen value for labeling is inconsistent.");
             }
         }
 
+        /// <summary>
+        /// Creates a labeling that is pre-constrained to be the sum of two other labelings.
+        /// </summary>
         public static IntervalLabeling operator +(IntervalLabeling a, IntervalLabeling b)
         {
             return new IntervalSumLabeling("sum", a, b);

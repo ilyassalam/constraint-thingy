@@ -56,6 +56,9 @@ namespace ConstraintThingyGUI
         /// </summary>
         public Node SupportRecipient { get; private set; }
 
+        /// <summary>
+        /// Declares that this node provides support to RECIPIENT.
+        /// </summary>
         public void SetSupport(Node recipient)
         {
             if (recipient.SupportRecipient != null)

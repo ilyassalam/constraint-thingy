@@ -6,8 +6,14 @@ using System.Linq;
 
 namespace ConstraintThingyGUI
 {
+    /// <summary>
+    /// Provides functions for reading CSV files.
+    /// </summary>
     public static class Spreadsheet
     {
+        /// <summary>
+        /// Reads a CSV file as an array of objects.
+        /// </summary>
         public static object[][] Read(string path, char delimiter)
         {
             using (TextReader r = File.OpenText(path))
@@ -96,6 +102,9 @@ namespace ConstraintThingyGUI
             return b.ToString();
         }
 
+        /// <summary>
+        /// Converts all numeric strings in the spreadsheet into numbers.
+        /// </summary>
         public static object[][] ConvertAllNumbers(object[][] spreadsheet)
         {
             for (int i = 0; i < spreadsheet.Length; i++)
@@ -112,6 +121,9 @@ namespace ConstraintThingyGUI
             return spreadsheet;
         }
 
+        /// <summary>
+        /// Removes whitespace from the strings in the spreadsheet.
+        /// </summary>
         public static object[][] TrimWhitespace(object[][] spreadsheet)
         {
             for (int i = 0; i < spreadsheet.Length; i++)
@@ -127,6 +139,9 @@ namespace ConstraintThingyGUI
             return spreadsheet;
         }
 
+        /// <summary>
+        /// Writes a spreadsheet
+        /// </summary>
         public static void Write(IList rows, string path, char delimiter)
         {
             List<IList> data = new List<IList>(rows.Count);

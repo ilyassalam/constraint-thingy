@@ -21,15 +21,18 @@ namespace ConstraintThingy
         /// We only update if the other variable has become unique. If so, we remove that value
         /// from this variable's potential values, and throw failure if that was its only possible value.
         /// </summary>
-        /// <param name="var"></param>
-        public override void UpdateVariable(FiniteDomainVariable var)
+        public override void UpdateVariable(FiniteDomainVariable var, ref bool succeeded)
         {
             FiniteDomainVariable otherVariable = (var == Variables[0]) ? Variables[1] : Variables[0];
             if (otherVariable.IsUnique)
             {
-                var.Value &= ~otherVariable.Value;
-                if (var.IsEmpty)
-                    throw new Failure("Inequality constraint failed.");
+                var newValue = var.Value & ~otherVariable.Value;
+                if (newValue == FiniteDomain.EmptySet)
+                {
+                    succeeded = false;
+                    return;
+                }
+                var.TrySetValue(newValue, ref succeeded);
             }
         }
     }

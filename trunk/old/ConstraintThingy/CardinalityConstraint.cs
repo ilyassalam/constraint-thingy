@@ -13,7 +13,7 @@ namespace ConstraintThingy
         public CardinalityConstraint(string value, int min, int max, params FiniteDomainVariable[] vars)
             : base(vars)
         {
-            for (int i=1; i<vars.Length; i++)
+            for (int i = 1; i < vars.Length; i++)
                 if (vars[i].Domain != vars[0].Domain)
                     throw new ArgumentException("Domains of constrained variables must be the same.");
             Value = value;
@@ -36,6 +36,7 @@ namespace ConstraintThingy
         /// Minimum number of times Value may occur
         /// </summary>
         public readonly int Min;
+
         /// <summary>
         /// Maximum number of times Value may occur
         /// </summary>
@@ -45,9 +46,10 @@ namespace ConstraintThingy
         /// Called when narrowedVariable is narrowed.
         /// Determine whether contraint is still satisfiable given the values of all participating variables.
         /// </summary>
-        /// <param name="narrowedVariable"></param>
-        public override void Narrowed(Variable narrowedVariable)
+        public override void Narrowed(Variable narrowedVariable, ref bool succeeded)
         {
+            if ((((FiniteDomainVariable)narrowedVariable).NarrowedElements & valueBit) == 0)
+                return;
             int possible = 0;
             int definite = 0;
             // Count up the number of variables that can/do have Value
@@ -66,26 +68,44 @@ namespace ConstraintThingy
                 foreach (var v in Variables)
 
                     if (v.ContainsAny(valueBit))
-                        v.Value = valueBit;
+                    {
+                        v.TrySetValue(valueBit, ref succeeded);
+                        if (!succeeded)
+                        {
+                            return;
+                        }
+                    }
             }
             else if (possible < Min)
-                throw new Failure("Too few possible occurances of Value in CardinalityConstraint");
+            {
+                succeeded = false;
+                return;
+            }
             if (definite == Max)
             {
                 // Rule out any remaining variables that are possible but not definite
                 foreach (var v in Variables)
 
                     if (v.ContainsAny(valueBit) && !v.IsUnique)
-                        v.Value &= ~valueBit;
+                    {
+                        v.TrySetValue(v.Value & ~valueBit, ref succeeded);
+                        if (!succeeded)
+                        {
+                            return;
+                        }
+                    }
             }
             else if (definite > Max)
-                throw new Failure("Too many occurances of Value in CardinalityConstraint");
+            {
+                succeeded = false;
+                return;
+            }
         }
 
         /// <summary>
         /// Not used for this type of constraint.
         /// </summary>
-        public override void UpdateVariable(FiniteDomainVariable var)
+        public override void UpdateVariable(FiniteDomainVariable var, ref bool succeeded)
         {
             // Should never reach this point.
             throw new NotImplementedException();

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Intervals;
+using System.Linq;
 
 namespace ConstraintThingyGUI
 {
@@ -162,7 +164,7 @@ namespace ConstraintThingyGUI
         {
             var graph = new UndirectedGraph();
             var data = Spreadsheet.ConvertAllNumbers(Spreadsheet.Read(path, ','));
-            var heading = new string[] {"Name", "X", "Y", "Supports", "Connections"};
+            var heading = new[] {"Name", "X", "Y", "Supports", "Connections"};
 
             // Check heading
             for (int i = 0; i<heading.Length; i++)
@@ -222,6 +224,139 @@ namespace ConstraintThingyGUI
                 if (n.Name == name)
                     return n;
             return null;
+        }
+
+        public void WriteASPFormat(string path, params string[] pathPredicates)
+        {
+            using (var writer = File.CreateText(path))
+            {
+                WriteRoomPredicates(writer);
+                foreach (var pred in pathPredicates)
+                    WritePathPredicate(writer, pred);
+            }
+        }
+
+        private void WriteRoomPredicates(StreamWriter writer)
+        {
+            writer.WriteLine("%");
+            writer.WriteLine("% Room declarations");
+            writer.WriteLine("%");
+            writer.Write("room(");
+            bool first = true;
+            foreach (var n  in Nodes)
+            {
+                if (first)
+                    first = false;
+                else
+                    writer.Write(";");
+                writer.Write(n.Name.ToLower());
+            }
+            writer.WriteLine(").");
+            writer.Write("has_support(");
+            first = true;
+            foreach (var n in Nodes)
+            {
+                if (n.Support.Count > 0)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        writer.Write(";");
+                    writer.Write(n.Name.ToLower());
+                }
+            }
+            writer.WriteLine(").");
+            writer.WriteLine();
+            writer.Write("is_supporter(");
+            first = true;
+            foreach (var n in Nodes)
+            {
+                if (n.SupportRecipient != null)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        writer.Write(";");
+                    writer.Write(n.Name.ToLower());
+                }
+            }
+            writer.WriteLine(").");
+            writer.WriteLine();
+        }
+
+        private void WritePathPredicate(TextWriter writer, string pred)
+        {
+            writer.WriteLine("%");
+            writer.WriteLine("% {0} declarations", pred);
+            writer.WriteLine("%");
+            writer.WriteLine();
+            WriteMainPredicateAndSupportPredicate(writer, pred);
+            writer.WriteLine();
+            writer.WriteLine("% inheritance");
+            WriteInheritancePredicate(writer, pred);
+            writer.WriteLine();
+        }
+
+        private void WriteMainPredicateAndSupportPredicate(TextWriter writer, string pred)
+        {
+            foreach (var n in Nodes)
+                WriteMainPredicateAndSupportPredicate(writer, pred, n);
+        }
+
+        private void WriteMainPredicateAndSupportPredicate(TextWriter writer, string pred, Node n)
+        {
+            writer.WriteLine("{0}({1}, Support+Inherit) :-\n    {0}_support({1}, Support), {0}_inheritance({1}, Inherit).", pred, n.Name.ToLower());
+            writer.Write("{0}_support({1}, Support0", pred, n.Name.ToLower());
+            for (int i=0; i<n.Support.Count;i++)
+                writer.Write("+Support{0}",i+1);
+            writer.WriteLine(") :-");
+            writer.Write("    {0}_delta({1}, Support0)", pred, n.Name.ToLower());
+            for (int i = 0; i < n.Support.Count;i++ )
+                writer.Write(", {0}_delta({1}, Support{2})", pred, n.Support[i].Name.ToLower(), i + 1);
+            writer.WriteLine(".");
+            //writer.Write("{0}_support({1}, {0}_delta({1})", pred, n.Name.ToLower());
+            //foreach (var s in n.Support)
+            //{
+            //    writer.Write("+{0}_delta({1})", pred, s.Name.ToLower());
+            //}
+            //writer.WriteLine(").");
+        }
+
+        private void WriteInheritancePredicate(TextWriter writer, string pred)
+        {
+            foreach (var n in Nodes)
+                WriteInheritancePredicate(writer, pred, n);
+        }
+
+        private void WriteInheritancePredicate(TextWriter writer, string pred, Node n)
+        {
+            List<Node> predecessors =
+                new List<Node>(Nodes.Where(candidate => candidate.SupportRecipient==null && (Edges.Any(e => (e.First == candidate && e.Second == n)))));
+            writer.WriteLine("{0}_inheritance({1}, InheritanceMin) :-", pred, n.Name.ToLower());
+            if (predecessors.Count == 0)
+                writer.Write("    {0}_delta({1}, InheritanceMin)", pred, n.Name.ToLower());
+            else
+            {
+                writer.Write("    {0}_delta({1}, Inheritance0)", pred, n.Name.ToLower());
+                int neighborCount = 0;
+                foreach (var s in n.Neighbors)
+                {
+                    writer.Write(", {0}_delta({1}, Inheritance{2})", pred, s.Name.ToLower(), neighborCount+1);
+                    neighborCount++;
+                }
+                writer.WriteLine();
+                writer.Write("    ");
+                if (neighborCount==1)
+                    writer.Write(", min(Inheritance0, Inheritance1, InheritanceMin)");
+                else
+                {
+                    writer.Write(", min(Inheritance0, Inheritance1, Temp0)");
+                    for (int i = 0; i < neighborCount - 2; i++)
+                        writer.Write(", min(Temp{0}, Inheritance{1}, Temp{2})", i, i + 2, i + 1);
+                    writer.Write(", min(Temp{0}, Inheritance{1}, InheritanceMin)", neighborCount-2, neighborCount);
+                }
+            }
+            writer.WriteLine(".");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define fancy
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
@@ -34,6 +35,7 @@ namespace ConstraintThingyGUI
             //}
 
             filePath = "c:/users/ian/desktop/residentevil.csv";
+            //filePath = "c:/users/ian/desktop/quad.csv";
             ReloadGraph();
         }
 
@@ -45,35 +47,114 @@ namespace ConstraintThingyGUI
             var graph = UndirectedGraph.FromSpreadsheet(filePath, 200);
 
             graphCanvas.Graph = UndirectedGraph.CurrentGraph = graph;
-            var type = new FiniteDomainLabeling("type", new FiniteDomain("hub", "forest", "swamp", "cave", "other"));
-            type.LimitOccurences("hub", 1, 1);
-            type.LimitOccurences("forest", 1, 1);
-            type.LimitOccurences("swamp", 1, 1);
-            type.LimitOccurences("cave", 1, 1);
+            //graph.WriteASPFormat("c:/users/ian/desktop/residentevil.lp", "health", "ammo", "lock");
+
+#if fancy
+            var contentType = new FiniteDomain("empty", "small-health-pack", "big-health-pack", "small-ammo", "big-ammo", "zombie", "two-zombies", "dog", "boss", "trap", "locked-door");
+            var contents = new FiniteDomainLabeling("contents", 
+                                                    contentType);
+            EasyConstraints(contents);
+            //HardForMansionConstraints(contents);
+            //HardForQuadConstraints(contents);
+
+            var healthDelta = new ScoreLabeling("health delta", contents,
+                                                0,
+                                                "small-health-pack", 10, "big-health-pack", 20,
+                                                "zombie", -10, "two-zombies", -25, "dog", -13, "trap", -10, "boss", -30);
+
+            var totalHealth = new StartEndPathLabeling("health", healthDelta, graph, 20, graph.FindNode("N24"), graph.FindNode("N12"));
+
+            var ammoDelta = new ScoreLabeling("ammo delta", contents,
+                                                0,
+                                                "small-ammo", 6, "big-ammo", 12,
+                                                "zombie", -1, "two-zombies", -2, "dog", -2, "boss", -8);
+
+            var totalAmmo = new StartEndPathLabeling("ammo", ammoDelta, graph, 5, graph.FindNode("N24"), graph.FindNode("N12"));
+
+            var lockDelta = new ScoreLabeling("lock delta", contents,
+                                                0,
+                                                "locked-door", -1, "boss", 2);
+
+            var totalLock = new StartEndPathLabeling("lock", lockDelta, graph, 0, graph.FindNode("N24"), graph.FindNode("N12"));
+#else
+            var contentType = new FiniteDomain("empty", "big-health-pack", "zombie", "two-zombies");
             var contents = new FiniteDomainLabeling("contents",
-                                                    new FiniteDomain("Big monster", "Little monster", "Health pack",
-                                                                     "empty"));
-            //contents[graph.FindNode("N1")] = "empty";
-            contents[graph.FindNode("N24")] = "empty";
-            //contents.LimitOccurences("Big monster", 1, 3);
-            //contents.LimitOccurences("Little monster", 1, 5);
-            //contents.LimitOccurences("Health pack", 1, 3);
-            contents.LimitOccurences("Big monster", 10, 20);
-            contents.LimitOccurences("Little monster", 20, 40);
-            contents.LimitOccurences("Health pack", 4, 40);
-            var score = new ScoreLabeling("health delta", contents, 0, "Big monster", -10, "Little monster", -5,
-                                          "Health pack", 10);
-            //var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N1"), graph.FindNode("N10"));
-            var totalHealth = new StartEndPathLabeling("health", score, graph, 10, graph.FindNode("N24"), graph.FindNode("N12"));
+                                                    contentType);
+            var healthDelta = new ScoreLabeling("health delta", contents,
+                                                0,
+                                                "big-health-pack", 20,
+                                                "zombie", -10, "two-zombies", -25);
+
+            contents.LimitOccurences("big-health-pack", 1, 7);
+            contents.LimitOccurences("zombie", 1, 5);
+            contents.LimitOccurences("two-zombies", 1, 3);
+
+            var totalHealth = new StartEndPathLabeling("health", healthDelta, graph, 20, graph.FindNode("N24"), graph.FindNode("N12"));
+#endif
+
             bool succeeded = true;
             foreach (var n in graph.Nodes)
                 if (n.SupportRecipient == null)
+                {
                     totalHealth.ValueVariable(n).NarrowTo(new Interval(1, float.MaxValue), ref succeeded);
+#if fancy
+                    totalAmmo.ValueVariable(n).NarrowTo(new Interval(0, float.MaxValue), ref succeeded);
+                    totalLock.ValueVariable(n).NarrowTo(new Interval(0, 2f), ref succeeded);
+#endif
+                }
+#if fancy
+                else
+                    contents.ValueVariable(n).TrySetValue(contentType.UniverseMask & ~(contentType.Bitmask("boss")|contentType.Bitmask("locked-door")), ref succeeded);
+
+            totalLock[graph.FindNode("N12")] = 1;
+#endif
             if (!succeeded)
-                throw new Exception("Initialization of totalHealth failed.");
+                throw new Exception("Initialization of label variables failed.");
 
             solutionIterator = Variable.SolutionsAllVariables().GetEnumerator();
             graphCanvas.UpdateText();
+        }
+
+        private static void EasyConstraints(FiniteDomainLabeling contents)
+        {
+            contents.LimitOccurences("small-health-pack", 0, 0);
+            contents.LimitOccurences("big-health-pack", 1, 40);
+            contents.LimitOccurences("small-ammo", 0, 0);
+            contents.LimitOccurences("big-ammo", 1, 40);
+            contents.LimitOccurences("zombie", 1, 40);
+            contents.LimitOccurences("two-zombies", 1, 40);
+            contents.LimitOccurences("dog", 1, 40);
+            contents.LimitOccurences("boss", 1, 1);
+            contents.LimitOccurences("trap", 1, 2);
+            contents.LimitOccurences("locked-door", 1, 1);
+        }
+
+        private static void HardForMansionConstraints(FiniteDomainLabeling contents)
+        {
+            contents.LimitOccurences("small-health-pack", 0, 0);
+            contents.LimitOccurences("big-health-pack", 0, 10);
+            contents.LimitOccurences("small-ammo", 0, 0);
+            contents.LimitOccurences("big-ammo", 0, 10);
+            contents.LimitOccurences("zombie", 3);
+            contents.LimitOccurences("two-zombies", 2);
+            contents.LimitOccurences("dog", 2);
+            contents.LimitOccurences("boss", 1);
+            contents.LimitOccurences("trap", 1);
+            contents.LimitOccurences("locked-door", 1);
+        }
+
+        private static void HardForQuadConstraints(FiniteDomainLabeling contents)
+        {
+            contents.LimitOccurences("small-health-pack", 3, 10);
+            contents.LimitOccurences("big-health-pack", 3, 10);
+            contents.LimitOccurences("small-ammo", 3, 10);
+            contents.LimitOccurences("big-ammo", 3, 10);
+            contents.LimitOccurences("zombie", 5);
+            contents.LimitOccurences("two-zombies", 5);
+            contents.LimitOccurences("dog", 5);
+            contents.LimitOccurences("boss", 1);
+            contents.LimitOccurences("trap", 2);
+            contents.LimitOccurences("locked-door", 1);
         }
 
         readonly Stopwatch timer = new Stopwatch();
@@ -96,7 +177,7 @@ namespace ConstraintThingyGUI
             //double timeForException = timer.ElapsedMilliseconds/1000000.0;
             timer.Reset();
             timer.Start();
-            solveButton.IsEnabled = solutionIterator.MoveNext();
+            Variable.SolutionsAllVariables().GetEnumerator().MoveNext();
             timer.Stop();
             //solutionTime.Content = string.Format("{0}ms; time for exception={1}", timer.ElapsedMilliseconds, timeForException);
             solutionTime.Content = string.Format("{0}ms", timer.ElapsedMilliseconds);
@@ -108,17 +189,19 @@ namespace ConstraintThingyGUI
         {
             Cursor = Cursors.Wait;
             GC.Collect(0);
+            GC.Collect(1);
             int collections = GC.CollectionCount(0);
             timer.Reset();
             timer.Start();
             int solutions = 0;
             while (solutions<10000)
             {
-                Variable.SolutionsAllVariables().GetEnumerator().MoveNext();
+                if (!Variable.SolutionsAllVariables().GetEnumerator().MoveNext())
+                    Debugger.Break();
                 solutions++;
             }
             timer.Stop();
-            solutionTime.Content = string.Format("{0} solutions, {1}ms, mean={2}\nTotal variables {3}\nTotal backtracks {4}\nMaximum undo stack depth {5}\n{6} collections at generation 0", 
+            solutionTime.Content = string.Format("{0} solutions, {1}ms, mean={2}\nTotal variables {3}\nTotal backtracks {4}, maximum undo stack depth {5}\n{6} collections at generation 0", 
                 solutions, 
                 timer.ElapsedMilliseconds, 
                 ((double)timer.ElapsedMilliseconds) / solutions,

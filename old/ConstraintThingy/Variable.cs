@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ConstraintThingy
 {
@@ -31,6 +32,8 @@ namespace ConstraintThingy
         {
             TotalBacktracks = TotalVariables = MaxUndoStackDepth = 0;
         }
+
+        private static int RemainingBacktracks { get; set; }
 
 
         /// <summary>
@@ -93,10 +96,14 @@ namespace ConstraintThingy
             // Understandable, but it means we have to manually implement a recursion stack.
             //
 
+            Debug.Assert(StackDepth == 0);
+            RestoreValues(0);
             if (vars.Length == 0)
                 yield break;
             // Allocate stack of enumerators
             var enumerators = new IEnumerator<bool>[vars.Length];
+        restart:
+            RemainingBacktracks = 10;
             int tos = 0;
             enumerators[tos] = vars[tos].UniqueValues().GetEnumerator();
             while (true)
@@ -104,6 +111,11 @@ namespace ConstraintThingy
                 // Find the next solution.
                 while (true)
                 {
+                    if (RemainingBacktracks < 0)
+                    {
+                        RestoreValues(0);
+                        goto restart;
+                    }
                     // Try to advance the variable at the top of stack
                     if (enumerators[tos].MoveNext())
                     {
@@ -198,6 +210,7 @@ namespace ConstraintThingy
         {
             MaxUndoStackDepth = Math.Max(MaxUndoStackDepth, UndoStack.Count);
             TotalBacktracks++;
+            RemainingBacktracks--;
             for (int c = StackDepth; c > framePointer; c--)
                 UndoStack.Pop().Restore();
             currentFramePointer = framePointer;
@@ -220,7 +233,7 @@ namespace ConstraintThingy
     /// A variable whose value is of type T.
     /// </summary>
     /// <typeparam name="T">Datatype for value of variable</typeparam>
-    [System.Diagnostics.DebuggerDisplay("{Name}={Value}")]
+    [DebuggerDisplay("{Name}={Value}")]
     public class Variable<T> : Variable
     {
         /// <summary>

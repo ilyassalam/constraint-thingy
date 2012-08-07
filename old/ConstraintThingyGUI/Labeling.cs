@@ -180,6 +180,14 @@ namespace ConstraintThingyGUI
         {
             new CardinalityConstraint(value, minOccurences, maxOccurences, ValueVariables());
         }
+
+        /// <summary>
+        /// Limits how many times VALUE can occur in the labeling
+        /// </summary>
+        public void LimitOccurences(string value, int occurences)
+        {
+            new CardinalityConstraint(value, occurences, occurences, ValueVariables());
+        }
     }
 
     /// <summary>

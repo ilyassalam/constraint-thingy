@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace ConstraintThingy
 {
     /// <summary>
     /// Restricts the number of times a specific value may occur in a set of finite domain variables
     /// </summary>
+    [DebuggerDisplay("{Value}")]
     public class CardinalityConstraint : Constraint<FiniteDomainVariable>
     {
         /// <summary>
@@ -48,8 +50,8 @@ namespace ConstraintThingy
         /// </summary>
         public override void Narrowed(Variable narrowedVariable, ref bool succeeded)
         {
-            if ((((FiniteDomainVariable)narrowedVariable).NarrowedElements & valueBit) == 0)
-                return;
+            //if ((((FiniteDomainVariable)narrowedVariable).NarrowedElements & valueBit) == 0)
+            //    return;
             int possible = 0;
             int definite = 0;
             // Count up the number of variables that can/do have Value
